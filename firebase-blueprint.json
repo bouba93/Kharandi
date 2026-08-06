@@ -1,0 +1,290 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "email": { "type": "string", "format": "email", "description": "User email" },
+        "role": { "type": "string", "enum": ["student", "teacher", "seller", "parent", "eleve", "boutique", "repetiteur"], "description": "User role" },
+        "name": { "type": "string", "description": "User full name" },
+        "interests": { "type": "array", "items": { "type": "string" }, "description": "User interests" },
+        "onboardingCompleted": { "type": "boolean", "description": "Whether onboarding is completed" },
+        "subscription_plan": { "type": "string", "description": "Current subscription plan" },
+        "subscription_expires_at": { "type": "string", "description": "ISO date for subscription expiration" },
+        "is_premium": { "type": "boolean", "description": "Whether the user has an active premium subscription" }
+      },
+      "required": ["uid", "email", "role", "name", "onboardingCompleted"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "Marketplace product",
+      "type": "object",
+      "properties": {
+        "sellerId": { "type": "string" },
+        "title": { "type": "string" },
+        "price": { "type": "number" },
+        "description": { "type": "string" },
+        "imageUrl": { "type": "string" }
+      },
+      "required": ["sellerId", "title", "price"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Marketplace order",
+      "type": "object",
+      "properties": {
+        "productId": { "type": "string" },
+        "productTitle": { "type": "string" },
+        "price": { "type": "number" },
+        "sellerId": { "type": "string" },
+        "buyerId": { "type": "string" },
+        "buyerEmail": { "type": "string" },
+        "timestamp": { "type": "object", "description": "Firestore ServerTimestamp" },
+        "status": { "type": "string", "enum": ["completed", "pending", "cancelled"] }
+      },
+      "required": ["productId", "productTitle", "price", "sellerId", "buyerId", "buyerEmail", "timestamp", "status"]
+    },
+    "Conversation": {
+      "title": "Conversation",
+      "description": "Chat conversation between two users",
+      "type": "object",
+      "properties": {
+        "participants": { "type": "array", "items": { "type": "string" }, "description": "UIDs of participants" },
+        "lastMessage": { "type": "string" },
+        "lastMessageTimestamp": { "type": "object" },
+        "participantNames": { "type": "object", "description": "Map of UID to Name" }
+      },
+      "required": ["participants", "lastMessageTimestamp"]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "Individual chat message",
+      "type": "object",
+      "properties": {
+        "conversationId": { "type": "string" },
+        "senderId": { "type": "string" },
+        "text": { "type": "string" },
+        "timestamp": { "type": "object" }
+      },
+      "required": ["conversationId", "senderId", "text", "timestamp"]
+    },
+    "Course": {
+      "title": "Course",
+      "description": "Educational course",
+      "type": "object",
+      "properties": {
+        "teacherId": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" }
+      },
+      "required": ["teacherId", "title"]
+    },
+    "Chapter": {
+      "title": "Chapter",
+      "description": "Course chapter",
+      "type": "object",
+      "properties": {
+        "courseId": { "type": "string" },
+        "title": { "type": "string" },
+        "content": { "type": "string" }
+      },
+      "required": ["courseId", "title"]
+    },
+    "ReadingProgress": {
+      "title": "ReadingProgress",
+      "description": "User reading progress for a document",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "documentId": { "type": "string" },
+        "progress": { "type": "number" },
+        "isRead": { "type": "boolean" }
+      },
+      "required": ["userId", "documentId", "progress", "isRead"]
+    },
+    "Shop": {
+      "title": "Shop",
+      "description": "Marketplace shop settings",
+      "type": "object",
+      "properties": {
+        "ownerId": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "phone": { "type": "string" },
+        "address": { "type": "string" },
+        "bannerUrl": { "type": "string" },
+        "smsNotifications": { "type": "boolean" },
+        "createdAt": { "type": "object" },
+        "updatedAt": { "type": "object" }
+      },
+      "required": ["ownerId", "name"]
+    },
+    "ExerciseHistory": {
+      "title": "ExerciseHistory",
+      "description": "User exercise completion history",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "exerciseId": { "type": "string" },
+        "score": { "type": "number" },
+        "total": { "type": "number" },
+        "pointsEarned": { "type": "number" },
+        "timestamp": { "type": "object" }
+      },
+      "required": ["userId", "exerciseId", "score", "total", "pointsEarned", "timestamp"]
+    },
+    "TutorAd": {
+      "title": "TutorAd",
+      "description": "Tutor offer or request",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["offer", "request"] },
+        "subject": { "type": "string" },
+        "level": { "type": "string" },
+        "location": { "type": "string" },
+        "description": { "type": "string" },
+        "phone": { "type": "string" },
+        "authorName": { "type": "string" },
+        "authorId": { "type": "string" },
+        "createdAt": { "type": "object" }
+      },
+      "required": ["type", "subject", "level", "location", "description", "phone", "authorName", "authorId", "createdAt"]
+    },
+    "Grade": {
+      "title": "Grade",
+      "description": "Student grade",
+      "type": "object",
+      "properties": {
+        "studentId": { "type": "string" },
+        "studentName": { "type": "string" },
+        "teacherId": { "type": "string" },
+        "subject": { "type": "string" },
+        "type": { "type": "string" },
+        "score": { "type": "number" },
+        "maxScore": { "type": "number" },
+        "date": { "type": "string" },
+        "createdAt": { "type": "object" }
+      },
+      "required": ["studentId", "studentName", "teacherId", "subject", "type", "score", "maxScore", "date", "createdAt"]
+    },
+    "SystemSettings": {
+      "title": "SystemSettings",
+      "description": "Global system settings",
+      "type": "object",
+      "properties": {
+        "maintenanceMode": { "type": "boolean" },
+        "announcement": { "type": "string" },
+        "pointsPerGnf": { "type": "number" },
+        "minWithdrawal": { "type": "number" }
+      },
+      "required": ["maintenanceMode", "announcement", "pointsPerGnf", "minWithdrawal"]
+    },
+    "PointTransaction": {
+      "title": "PointTransaction",
+      "description": "User point transaction for marketplace",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "productId": { "type": "string" },
+        "productTitle": { "type": "string" },
+        "pointCost": { "type": "number" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "timestamp": { "type": "object" }
+      },
+      "required": ["userId", "productId", "productTitle", "pointCost", "status", "timestamp"]
+    },
+    "MarketplaceItem": {
+      "title": "MarketplaceItem",
+      "description": "Marketplace item managed by admin",
+      "type": "object",
+      "properties": {
+        "sellerId": { "type": "string" },
+        "title": { "type": "string" },
+        "price": { "type": "number" },
+        "createdAt": { "type": "object" }
+      },
+      "required": ["sellerId", "title", "price", "createdAt"]
+    },
+    "Banner": {
+      "title": "Banner",
+      "description": "Promotional banner for the home page",
+      "type": "object",
+      "properties": {
+        "imageUrl": { "type": "string" },
+        "link": { "type": "string" },
+        "active": { "type": "boolean" },
+        "createdAt": { "type": "object" }
+      },
+      "required": ["imageUrl", "active", "createdAt"]
+    },
+    "SystemLog": {
+      "title": "SystemLog",
+      "description": "System error and activity logs",
+      "type": "object",
+      "properties": {
+        "error": { "type": "string" },
+        "operationType": { "type": "string" },
+        "path": { "type": "string" },
+        "userId": { "type": "string" },
+        "timestamp": { "type": "object" }
+      },
+      "required": ["error", "timestamp"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "User notification",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "The recipient's UID" },
+        "title": { "type": "string" },
+        "desc": { "type": "string" },
+        "type": { "type": "string", "enum": ["subscription", "tutor", "system", "order"] },
+        "unread": { "type": "boolean" },
+        "createdAt": { "type": "object" },
+        "bg": { "type": "string" },
+        "color": { "type": "string" },
+        "glow": { "type": "string" }
+      },
+      "required": ["userId", "title", "desc", "unread", "createdAt"]
+    },
+    "SubscriptionTransaction": {
+      "title": "SubscriptionTransaction",
+      "description": "Tracking for user subscription payments",
+      "type": "object",
+      "properties": {
+        "transaction_id": { "type": "string" },
+        "user_id": { "type": "string" },
+        "plan_id": { "type": "string" },
+        "amount": { "type": "number" },
+        "status": { "type": "string", "enum": ["pending", "success", "failed"] },
+        "created_at": { "type": "string" },
+        "updated_at": { "type": "string" },
+        "reason": { "type": "string" }
+      },
+      "required": ["transaction_id", "user_id", "plan_id", "amount", "status", "created_at"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": { "schema": { "$ref": "User" }, "description": "User profiles" },
+    "/products/{productId}": { "schema": { "$ref": "Product" }, "description": "Marketplace products" },
+    "/courses/{courseId}": { "schema": { "$ref": "Course" }, "description": "Courses" },
+    "/chapters/{chapterId}": { "schema": { "$ref": "Chapter" }, "description": "Course chapters" },
+    "/readingProgress/{progressId}": { "schema": { "$ref": "ReadingProgress" }, "description": "User reading progress" },
+    "/orders/{orderId}": { "schema": { "$ref": "Order" }, "description": "Marketplace orders" },
+    "/conversations/{conversationId}": { "schema": { "$ref": "Conversation" }, "description": "Chat conversations" },
+    "/messages/{messageId}": { "schema": { "$ref": "Message" }, "description": "Chat messages" },
+    "/shops/{shopId}": { "schema": { "$ref": "Shop" }, "description": "Marketplace shop settings" },
+    "/exercise_history/{historyId}": { "schema": { "$ref": "ExerciseHistory" }, "description": "Exercise completion history" },
+    "/tutor_ads/{adId}": { "schema": { "$ref": "TutorAd" }, "description": "Tutor offers and requests" },
+    "/grades/{gradeId}": { "schema": { "$ref": "Grade" }, "description": "Student grades" },
+    "/system_settings/{settingsId}": { "schema": { "$ref": "SystemSettings" }, "description": "Global system settings" },
+    "/point_transactions/{transactionId}": { "schema": { "$ref": "PointTransaction" }, "description": "User point transactions" },
+    "/marketplace_items/{itemId}": { "schema": { "$ref": "MarketplaceItem" }, "description": "Marketplace items" },
+    "/banners/{bannerId}": { "schema": { "$ref": "Banner" }, "description": "Home page banners" },
+    "/system_logs/{logId}": { "schema": { "$ref": "SystemLog" }, "description": "System logs" },
+    "/notifications/{notificationId}": { "schema": { "$ref": "Notification" }, "description": "User notifications" },
+    "/subscription_transactions/{transactionId}": { "schema": { "$ref": "SubscriptionTransaction" }, "description": "Subscription payments" }
+  }
+}

@@ -1,0 +1,12 @@
+import { api } from "../config/api";
+export const getProducts      = async (f?: any) => { const p = new URLSearchParams(f || {}); const { data } = await api.get(`/marketplace/products/?${p}`); return data?.data || []; };
+export const getMyProducts    = async () => { const { data } = await api.get("/marketplace/products/mine/"); return data?.data || []; };
+export const createProduct    = async (payload: any) => { const { data } = await api.post("/marketplace/products/", payload); return data?.data; };
+export const updateProduct    = async (id: string, payload: any) => { const { data } = await api.patch(`/marketplace/products/${id}/`, payload); return data?.data; };
+export const deleteProduct    = async (id: string) => { await api.delete(`/marketplace/products/${id}/`); };
+export const getMyPromos      = async () => { const { data } = await api.get("/marketplace/promos/"); return data?.data || []; };
+export const createPromo      = async (payload: any) => { const { data } = await api.post("/marketplace/promos/", payload); return data?.data; };
+export const checkPromoCode   = async (code: string) => { const { data } = await api.post("/marketplace/promos/check/", { code }); return data?.data; };
+export const getSellerOrders  = async () => { const { data } = await api.get("/marketplace/seller/orders/"); return data?.data || []; };
+export const updateOrderStatus= async (id: string, status: string) => { await api.patch(`/marketplace/seller/orders/${id}/`, { status }); };
+export const placeOrder       = async (productId: string) => { const { data } = await api.post("/marketplace/orders/", { product_id: productId }); return data?.data; };

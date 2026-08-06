@@ -1,0 +1,222 @@
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: users
+// Document ID: {uid}
+// Fields:
+//   - uid: string (required)
+//   - email: string (required)
+//   - role: string (required, ['admin', 'student', 'teacher', 'seller', 'ecole', 'parent'])
+//   - isApproved: bool (required)
+//   - points: number
+//   - isGuest: bool
+//
+// Collection: products
+// Document ID: auto-generated
+// Fields:
+//   - title: string
+//   - price: number
+//   - sellerId: string
+//   - status: string (['pending', 'approved', 'rejected'])
+//
+// Collection: orders
+// Document ID: auto-generated
+// Fields:
+//   - buyerId: string
+//   - items: list
+//   - totalAmount: number
+//   - status: string
+//
+// [And many others based on the feature set]
+//
+// ===============================================================
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+         request.auth.token.email in ['bouba9882@gmail.com', 'boubabatuta@gmail.com', 'elisekoivogui1@gmail.com', 'aboubacarcamara@gmail.com']);
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidNotification(data) {
+      return data.userId is string && data.userId.size() <= 128 &&
+             data.title is string && data.title.size() <= 200 &&
+             data.desc is string && data.desc.size() <= 1000 &&
+             data.unread is bool &&
+             data.createdAt != null;
+    }
+    
+    function isValidUser(data) {
+      return data.uid is string && 
+             data.email is string &&
+             data.role in ['admin', 'student', 'teacher', 'seller', 'ecole', 'parent', 'guest', 'eleve', 'boutique', 'repetiteur'] &&
+             data.role.size() < 50;
+    }
+
+    // ===============================================================
+    // Rules Matching
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isOwner(userId) && isValidUser(request.resource.data);
+      allow update: if isAuthenticated() && (
+        isAdmin() || 
+        (isOwner(userId) && !incoming().diff(existing()).affectedKeys().hasAny(['subscription_plan', 'subscription_expires_at', 'is_premium']))
+      );
+      allow delete: if isAdmin();
+    }
+    
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow update: if isAuthenticated() && isOwner(resource.data.userId) && 
+                      incoming().diff(existing()).affectedKeys().hasOnly(['unread']);
+      allow create, delete: if isAdmin();
+    }
+
+    match /readingProgress/{progressId} {
+      allow read, write: if isAuthenticated() && (isOwner(resource.data.userId) || isAdmin());
+      allow create: if isAuthenticated() && isOwner(request.resource.data.userId);
+    }
+
+    match /exercise_history/{historyId} {
+      allow read: if isAuthenticated() && (isOwner(resource.data.userId) || isAdmin());
+      allow create: if isAuthenticated() && isOwner(request.resource.data.userId);
+    }
+
+    match /tutor_ads/{adId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && (isOwner(resource.data.authorId) || isAdmin());
+      allow delete: if isAuthenticated() && (isOwner(resource.data.authorId) || isAdmin());
+    }
+
+    match /grades/{gradeId} {
+      allow read: if isAuthenticated() && (isOwner(resource.data.studentId) || isOwner(resource.data.teacherId) || isAdmin());
+      allow create: if isAuthenticated(); // Should check if teacher, but role is in user doc
+    }
+
+    match /point_transactions/{transactionId} {
+      allow read: if isAuthenticated() && (isOwner(resource.data.userId) || isAdmin());
+      allow create: if isAuthenticated() && isOwner(request.resource.data.userId);
+    }
+
+    match /marketplace_items/{itemId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /banners/{bannerId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /system_logs/{logId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /shops/{shopId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && (isOwner(resource.data.ownerId) || isAdmin());
+    }
+    
+    match /products/{productId} {
+      allow read: if true; // Public marketplace
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && (request.auth.uid == resource.data.sellerId || isAdmin());
+      allow delete: if isAdmin();
+    }
+    
+    match /orders/{orderId} {
+      allow read: if isAuthenticated() && (isOwner(resource.data.buyerId) || isAdmin());
+      allow create: if isAuthenticated();
+      allow update: if isAdmin();
+    }
+    
+    match /conversations/{convId} {
+      allow read, write: if isAuthenticated();
+    }
+    
+    match /messages/{msgId} {
+      allow read, write: if isAuthenticated();
+    }
+    
+    match /tickets/{ticketId} {
+      allow read: if isAuthenticated() && (isOwner(resource.data.userId) || isAdmin());
+      allow create: if isAuthenticated();
+      allow update: if isAdmin();
+    }
+    
+    match /system_settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /auditLogs/{logId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /subscription_transactions/{transactionId} {
+      allow read: if isAuthenticated() && (resource.data.user_id == request.auth.uid || isAdmin());
+      allow write: if false; // Géré par le serveur (Admin SDK)
+    }
+
+    match /news/{itemId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /scholarships/{itemId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /exam_results/{itemId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /study_abroad/{itemId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /school_rankings/{itemId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /{path=**} {
+      allow read, write: if isAdmin();
+    }
+  }
+}

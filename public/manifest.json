@@ -1,0 +1,104 @@
+{
+  "name": "Kharandi - Ton Camarade Scolaire",
+  "short_name": "Kharandi",
+  "id": "com.kharandi.app",
+  "description": "Plateforme éducative de référence en Guinée. Accédez facilement à vos cours, exercices, résultats d'examens, bourses d'études et au Kharandi Makiti (Marketplace).",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui", "browser"],
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#0D1B2A",
+  "lang": "fr",
+  "dir": "ltr",
+  "categories": [
+    "education",
+    "productivity",
+    "social"
+  ],
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Exercices et Sujets",
+      "short_name": "Exercices",
+      "description": "S'entraîner sur les sujets de BAC, BEPC et examens de classe",
+      "url": "/?tab=exercises",
+      "icons": [
+        {
+          "src": "https://lh3.googleusercontent.com/d/1OZYMWFyonv2kMY4KvVNZ4-5mLSwsruE7",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Bibliothèque Numérique",
+      "short_name": "Bibliothèque",
+      "description": "Consulter les cours, livres et formations",
+      "url": "/?tab=library",
+      "icons": [
+        {
+          "src": "https://lh3.googleusercontent.com/d/1OZYMWFyonv2kMY4KvVNZ4-5mLSwsruE7",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Makiti (Marketplace)",
+      "short_name": "Makiti",
+      "description": "Fournitures et matériels scolaires",
+      "url": "/?tab=makiti",
+      "icons": [
+        {
+          "src": "https://lh3.googleusercontent.com/d/1OZYMWFyonv2kMY4KvVNZ4-5mLSwsruE7",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "https://lh3.googleusercontent.com/d/1OZYMWFyonv2kMY4KvVNZ4-5mLSwsruE7",
+      "sizes": "947x454",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Kharandi - Version Mobile"
+    },
+    {
+      "src": "https://lh3.googleusercontent.com/d/1OZYMWFyonv2kMY4KvVNZ4-5mLSwsruE7",
+      "sizes": "947x454",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Kharandi - Version Ordinateur"
+    }
+  ],
+  "icons": [
+    {
+      "src": "https://lh3.googleusercontent.com/d/1OZYMWFyonv2kMY4KvVNZ4-5mLSwsruE7",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://lh3.googleusercontent.com/d/1OZYMWFyonv2kMY4KvVNZ4-5mLSwsruE7",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://lh3.googleusercontent.com/d/1OZYMWFyonv2kMY4KvVNZ4-5mLSwsruE7",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "https://lh3.googleusercontent.com/d/1OZYMWFyonv2kMY4KvVNZ4-5mLSwsruE7",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

@@ -1,0 +1,182 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Geist+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --color-primary: #18bfd6; /* Kharandi Primary Cyan */
+  --color-secondary: #fcb303; /* Kharandi Secondary Yellow/Orange */
+  --color-accent: #fcb303; /* Using secondary as accent for consistency */
+  --color-bg-main: #FAFBFD; /* Elegant brand-oriented off-white breaking clinical white */
+  --color-text-main: #0F172A; /* Slate 900 */
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-body: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+body {
+  background-color: var(--color-bg-main);
+  color: var(--color-text-main);
+  font-family: var(--font-body);
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Global Background Pattern - Gorgeous copybook-grand-carreaux grid paper theme matching schools & Guinea */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background-color: #f9fbfd;
+  background-image: 
+    linear-gradient(rgba(24, 191, 214, 0.14) 1.5px, transparent 1.5px),
+    linear-gradient(90deg, rgba(24, 191, 214, 0.14) 1.5px, transparent 1.5px);
+  background-size: 28px 28px;
+  pointer-events: none;
+}
+
+/* Beautiful red margin line for school notebook realism, positioned far left */
+body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: min(4%, 32px);
+  width: 2.2px;
+  height: 100%;
+  background-color: rgba(239, 68, 68, 0.32);
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Decorative Blobs - Made more lively with Kharandi colors */
+.blob {
+  position: fixed;
+  z-index: -1;
+  filter: blur(80px);
+  opacity: 0.25;
+  pointer-events: none;
+  border-radius: 50%;
+  animation: float 20s infinite alternate ease-in-out;
+}
+
+@keyframes float {
+  0% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -50px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+.blob-primary {
+  width: 400px;
+  height: 400px;
+  background: var(--color-primary);
+  top: -100px;
+  right: -100px;
+  animation-duration: 25s;
+}
+
+.blob-secondary {
+  width: 300px;
+  height: 300px;
+  background: var(--color-secondary);
+  bottom: -50px;
+  left: -50px;
+  animation-duration: 30s;
+  animation-delay: -5s;
+}
+
+.blob-accent {
+  width: 250px;
+  height: 250px;
+  background: var(--color-accent);
+  top: 40%;
+  left: 10%;
+  animation-duration: 20s;
+  animation-delay: -10s;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-sans);
+}
+
+.glass-card {
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.glass-sidebar {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(16px);
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Mobile-specific refinements */
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 24px);
+  }
+  
+  .mobile-touch-target {
+    @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
+  }
+}
+
+/* Better typography for mobile */
+@media (max-width: 640px) {
+  h1 { @apply text-3xl; }
+  h2 { @apply text-2xl; }
+  h3 { @apply text-xl; }
+  .p-6 { @apply p-4; }
+  .gap-6 { @apply gap-4; }
+}
+
+/* Smooth transitions for all interactive elements */
+button, a, input, select {
+  @apply transition-all duration-200;
+}
+
+/* Custom scrollbar for desktop */
+@media (min-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #cbd5e1;
+  }
+}

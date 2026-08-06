@@ -1,0 +1,6 @@
+{
+  "name": "Kharandi",
+  "description": "Kharandi ERP - Système intégré de gestion scolaire et éducative (Inscriptions, Bulletins, Emploi du temps, Comptabilité & Trésorerie, RH & Paie, Bibliothèque & Inventaire, Assistant IA Karamö).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
