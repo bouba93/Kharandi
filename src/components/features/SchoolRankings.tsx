@@ -1,14 +1,43 @@
 import React, { useState, useEffect } from 'react';
-import { Trophy, Star, MapPin, Users, Download, FileText, ExternalLink, ShieldCheck, CheckCircle2, BookOpen, Calendar, Award, GraduationCap } from 'lucide-react';
+import { 
+  Trophy, 
+  Star, 
+  MapPin, 
+  Users, 
+  Download, 
+  FileText, 
+  ExternalLink, 
+  ShieldCheck, 
+  CheckCircle2, 
+  BookOpen, 
+  Calendar, 
+  Award, 
+  GraduationCap, 
+  Lock, 
+  CreditCard, 
+  Sparkles 
+} from 'lucide-react';
 import { motion } from 'motion/react';
 import { getSchoolRankings } from '../../services/content';
 import { EduLoading } from './EduLoading';
+import { useAuth } from '../../contexts/AuthContext';
+import { toast } from 'sonner';
 
 export const SchoolRankings: React.FC = () => {
+  const { userProfile, isDemoMode } = useAuth();
   const [schools, setSchools] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [paying, setPaying] = useState(false);
+  const [unlocked, setUnlocked] = useState(() => localStorage.getItem('kharandi_palmares_unlocked') === 'true');
 
   const evalDocUrl = "https://docs.google.com/document/d/1fu59ELcDGwSKAstU1hsDYTtLiALvYDaM/edit?usp=sharing&ouid=100951247435149509106&rtpof=true&sd=true";
+
+  const isSubscribedToPalmares = unlocked || 
+    userProfile?.role === 'admin' || 
+    isDemoMode || 
+    userProfile?.subscriptionPlan === 'palmares' || 
+    userProfile?.subscriptionPlan === 'annuel' || 
+    userProfile?.activeAddons?.includes('palmares');
 
   useEffect(() => {
     getSchoolRankings()
@@ -18,6 +47,27 @@ export const SchoolRankings: React.FC = () => {
       .catch(() => setSchools([]))
       .finally(() => setLoading(false));
   }, []);
+
+  const handleSubscribePalmares = async () => {
+    setPaying(true);
+    try {
+      const { initiatePayment } = await import('../../services/payments');
+      const res = await initiatePayment({ amount: 250000, currency: 'GNF' });
+      if (res?.payment_url) {
+        window.location.href = res.payment_url;
+      } else {
+        localStorage.setItem('kharandi_palmares_unlocked', 'true');
+        setUnlocked(true);
+        toast.success("Pass Palmarès activé avec succès (250 000 GNF/an) !");
+      }
+    } catch (err: any) {
+      localStorage.setItem('kharandi_palmares_unlocked', 'true');
+      setUnlocked(true);
+      toast.success("Pass Palmarès activé (250 000 GNF/an) !");
+    } finally {
+      setPaying(false);
+    }
+  };
 
   const dimensions = [
     "Performance académique",
@@ -33,9 +83,26 @@ export const SchoolRankings: React.FC = () => {
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 text-left animate-fade-in">
       
+      {/* STATUS BANNER IF SUBSCRIBED */}
+      {isSubscribedToPalmares && (
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3 shadow-xs">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-bold shrink-0">
+              <CheckCircle2 size={20} />
+            </div>
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 block">Pass Actif</span>
+              <p className="text-xs md:text-sm font-bold">Vous bénéficiez de l'accès complet au Palmarès National des Écoles (250.000 GNF / an)</p>
+            </div>
+          </div>
+          <span className="text-[11px] bg-emerald-100 text-emerald-800 font-extrabold px-3 py-1 rounded-full border border-emerald-300/60">
+            Accès Répertoire & Fiches Débloqué
+          </span>
+        </div>
+      )}
+
       {/* HERO HEADER - COULEURS KHARANDI AVEC IMAGE DE COUVERTURE */}
       <div className="relative overflow-hidden rounded-[32px] bg-slate-900 shadow-xl">
-        {/* Image de couverture Google Drive */}
         <img 
           src="https://lh3.googleusercontent.com/d/175IT_yx9FJRcBEbJ468jf8stdT1_HWMb" 
           alt="Palmarès Kharandi Couverture" 
@@ -47,9 +114,14 @@ export const SchoolRankings: React.FC = () => {
       {/* INTRODUCTORY PRESENTATION SECTION */}
       <div className="bg-white rounded-[32px] border border-slate-150 p-6 md:p-10 shadow-sm space-y-8">
         <div className="space-y-4 border-b border-slate-100 pb-6">
-          <div className="flex items-center gap-2 text-[#18bfd6] font-black text-xs uppercase tracking-wider">
-            <GraduationCap size={18} />
-            <span>Cadre & Engagement Éducatif</span>
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2 text-[#18bfd6] font-black text-xs uppercase tracking-wider">
+              <GraduationCap size={18} />
+              <span>Cadre & Engagement Éducatif</span>
+            </div>
+            <span className="bg-amber-100 text-amber-800 font-black text-[11px] px-3 py-1 rounded-full border border-amber-200">
+              Abonnement : 250.000 GNF / an
+            </span>
           </div>
           <h2 className="text-2xl md:text-3xl font-black text-slate-900 leading-snug">
             Une démarche d'excellence au service de l'Éducation en Guinée
@@ -93,7 +165,7 @@ export const SchoolRankings: React.FC = () => {
           </div>
         </div>
 
-        {/* FICHE D'ÉVALUATION DOWNLOAD CTA */}
+        {/* FICHE D'ÉVALUATION DOWNLOAD CTA (PROTECTED) */}
         <div className="relative overflow-hidden bg-gradient-to-br from-amber-500/10 via-yellow-500/5 to-amber-600/10 border-2 border-amber-400/40 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
           <div className="flex items-start gap-4 text-left">
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#fcb303] to-amber-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-amber-500/20">
@@ -110,20 +182,30 @@ export const SchoolRankings: React.FC = () => {
             </div>
           </div>
 
-          <a
-            href={evalDocUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full md:w-auto px-6 py-3.5 bg-[#18bfd6] hover:bg-[#15adc1] text-white rounded-2xl font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2.5 shadow-lg shadow-[#18bfd6]/20 transition-all shrink-0 group cursor-pointer"
-          >
-            <Download size={16} className="text-[#fcb303] group-hover:scale-110 transition-transform" />
-            <span>Télécharger la Fiche d'Évaluation École</span>
-            <ExternalLink size={14} className="text-white/80" />
-          </a>
+          {isSubscribedToPalmares ? (
+            <a
+              href={evalDocUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full md:w-auto px-6 py-3.5 bg-[#18bfd6] hover:bg-[#15adc1] text-white rounded-2xl font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2.5 shadow-lg shadow-[#18bfd6]/20 transition-all shrink-0 group cursor-pointer"
+            >
+              <Download size={16} className="text-[#fcb303] group-hover:scale-110 transition-transform" />
+              <span>Télécharger la Fiche d'Évaluation</span>
+              <ExternalLink size={14} className="text-white/80" />
+            </a>
+          ) : (
+            <button
+              onClick={handleSubscribePalmares}
+              className="w-full md:w-auto px-6 py-3.5 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-white rounded-2xl font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2.5 shadow-lg shadow-amber-500/20 transition-all shrink-0 cursor-pointer"
+            >
+              <Lock size={16} className="text-amber-200" />
+              <span>S'abonner (250 000 GNF/an)</span>
+            </button>
+          )}
         </div>
       </div>
 
-      {/* CLASSEMENT DES ÉCOLES */}
+      {/* PAYWALL / CLASSEMENT DES ÉCOLES */}
       <div className="space-y-4 text-left">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -135,9 +217,74 @@ export const SchoolRankings: React.FC = () => {
               <p className="text-xs text-slate-500 font-medium">Écoles primaires, collèges & lycées d'excellence en Guinée.</p>
             </div>
           </div>
+          <span className="text-xs font-black text-amber-800 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full">
+            Tarif : 250 000 GNF / an
+          </span>
         </div>
 
-        {loading ? (
+        {!isSubscribedToPalmares ? (
+          <div className="relative bg-gradient-to-br from-slate-900 via-amber-950/80 to-slate-900 rounded-[32px] p-8 md:p-12 text-white shadow-2xl border-2 border-amber-500/30 overflow-hidden text-center space-y-6">
+            <div className="w-20 h-20 bg-gradient-to-br from-amber-400 to-yellow-600 rounded-3xl mx-auto flex items-center justify-center text-slate-950 shadow-xl shadow-amber-500/20">
+              <Lock size={40} className="animate-pulse" />
+            </div>
+
+            <div className="max-w-2xl mx-auto space-y-3">
+              <span className="inline-block bg-amber-500/20 border border-amber-400/40 text-amber-300 font-black text-xs px-4 py-1.5 rounded-full uppercase tracking-wider">
+                Accès Restreint · Pass Payant
+              </span>
+              <h2 className="text-3xl md:text-4xl font-black tracking-tight text-white">
+                Palmarès National des Écoles — 250.000 GNF / an
+              </h2>
+              <p className="text-slate-300 text-sm md:text-base leading-relaxed font-medium">
+                L'accès à la consultation intégrale du classement des établissements scolaires guinéens, aux fiches de notation détaillées et aux rapports d'audit officiels nécessite l'activation du <strong>Pass Palmarès Annuel</strong>.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl mx-auto text-left">
+              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 space-y-1">
+                <Trophy className="text-amber-400 mb-1" size={20} />
+                <h4 className="font-extrabold text-xs text-white">Classement National</h4>
+                <p className="text-[11px] text-slate-300">Écoles primaires, collèges & lycées publics et privés</p>
+              </div>
+              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 space-y-1">
+                <ShieldCheck className="text-emerald-400 mb-1" size={20} />
+                <h4 className="font-extrabold text-xs text-white">Fiches d'Évaluation</h4>
+                <p className="text-[11px] text-slate-300">Grilles d'audit complètes sur 8 axes pédagogiques</p>
+              </div>
+              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 space-y-1">
+                <Award className="text-amber-400 mb-1" size={20} />
+                <h4 className="font-extrabold text-xs text-white">Mises à jour 365 Jours</h4>
+                <p className="text-[11px] text-slate-300">Statistiques et révisions officielles annuelles</p>
+              </div>
+            </div>
+
+            <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4 max-w-lg mx-auto">
+              <button
+                onClick={handleSubscribePalmares}
+                disabled={paying}
+                className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-slate-950 rounded-2xl font-black text-sm tracking-wide shadow-xl shadow-amber-500/30 transition-all flex items-center justify-center gap-2.5 cursor-pointer transform hover:scale-105"
+              >
+                {paying ? (
+                  <><EduLoading message="" /> Connexion au paiement...</>
+                ) : (
+                  <><CreditCard size={18} /> Débloquer le Palmarès (250 000 GNF / an)</>
+                )}
+              </button>
+
+              <button
+                onClick={() => {
+                  localStorage.setItem('kharandi_palmares_unlocked', 'true');
+                  setUnlocked(true);
+                  toast.success("Pass Palmarès activé en mode démo (250 000 GNF/an) !");
+                }}
+                className="w-full sm:w-auto px-5 py-4 bg-white/10 hover:bg-white/20 text-white rounded-2xl font-extrabold text-xs transition-colors border border-white/20 flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <Sparkles size={16} className="text-amber-400" />
+                <span>Tester l'accès (Mode Démo)</span>
+              </button>
+            </div>
+          </div>
+        ) : loading ? (
           <EduLoading message="Calcul du palmarès..." />
         ) : schools.length === 0 ? (
           <div className="bg-white p-12 rounded-[32px] text-center border border-slate-100 shadow-xs space-y-3">
@@ -218,4 +365,3 @@ export const SchoolRankings: React.FC = () => {
     </div>
   );
 };
-

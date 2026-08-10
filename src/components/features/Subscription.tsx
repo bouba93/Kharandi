@@ -13,13 +13,14 @@ import {
   ArrowRight, 
   UserCheck, 
   Coins, 
-  Target
+  Target,
+  Trophy
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { toast } from 'sonner';
 import { getPlans, getSubscriptionStatus, initiateSubscription } from '../../services/payments';
 
-type TabType = 'STUDENT' | 'TUTOR' | 'SELLER' | 'SCHOOL' | 'CERTIFICATION';
+type TabType = 'STUDENT' | 'PALMARES' | 'TUTOR' | 'SELLER' | 'SCHOOL' | 'CERTIFICATION';
 
 export const Subscription: React.FC = () => {
   const { userProfile } = useAuth();
@@ -189,9 +190,10 @@ export const Subscription: React.FC = () => {
       </div>
 
       {/* TABS SELECTOR */}
-      <div className="flex flex-wrap justify-center gap-2 md:gap-3 bg-slate-100 p-2 rounded-[24px] mb-10 max-w-3xl mx-auto border border-slate-200/50 shadow-inner">
+      <div className="flex flex-wrap justify-center gap-2 md:gap-3 bg-slate-100 p-2 rounded-[24px] mb-10 max-w-4xl mx-auto border border-slate-200/50 shadow-inner">
         {[
           { id: 'STUDENT', label: 'Espace Élève', icon: GraduationCap, color: 'hover:text-primary' },
+          { id: 'PALMARES', label: 'Pass Palmarès (250K)', icon: Trophy, color: 'hover:text-amber-600' },
           { id: 'TUTOR', label: 'Répétiteurs', icon: UserCheck, color: 'hover:text-secondary' },
           { id: 'SELLER', label: 'Vendeur (Boutique)', icon: Store, color: 'hover:text-accent' },
           { id: 'SCHOOL', label: 'Forfait - Kharandi École', icon: School, color: 'hover:text-primary' },
@@ -286,6 +288,85 @@ export const Subscription: React.FC = () => {
                     <><Loader2 className="animate-spin" size={18} /> Demande de paiement...</>
                   ) : (
                     <>S'abonner maintenant <ArrowRight size={16} /></>
+                  )}
+                </button>
+                <p className="text-[10px] text-center text-slate-400 font-extrabold uppercase">
+                  Paiement Mobile Money Sécurisé
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* B. PASS PALMARES NATIONAL DES ECOLES */}
+        {activeTab === 'PALMARES' && (
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center max-w-5xl mx-auto">
+            <div className="md:col-span-7 space-y-6">
+              <div>
+                <span className="bg-amber-100 text-amber-800 font-extrabold text-[10px] px-3 py-1 rounded-full uppercase tracking-wider border border-amber-200">
+                  Pass Exclusif Annuel
+                </span>
+                <h2 className="text-3xl font-black text-slate-900 mt-2">Pass Palmarès National des Écoles</h2>
+                <p className="text-slate-500 mt-2 font-medium">
+                  Accès privilégié et illimité au classement officiel des établissements scolaires guinéens (écoles primaires, collèges et lycées, publics et privés), rapports d'audit détaillés et statistiques de performance.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {[
+                  "Classement intégral des meilleures écoles de Guinée",
+                  "Audits détaillés selon les 8 dimensions de qualité",
+                  "Téléchargement des fiches d'évaluation officielles",
+                  "Statistiques comparatives par région et préfecture",
+                  "Mises à jour annuelles et palmarès des examens nationaux"
+                ].map((feat, idx) => (
+                  <div key={idx} className="flex gap-2.5 items-start">
+                    <div className="w-5 h-5 rounded-full bg-amber-100 border border-amber-200 flex items-center justify-center shrink-0 mt-0.5">
+                      <CheckCircle2 size={12} className="text-amber-700" />
+                    </div>
+                    <span className="text-xs font-bold text-slate-700 leading-tight">{feat}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="bg-amber-50 border border-amber-200/80 rounded-2xl p-4 text-xs font-semibold text-slate-700 flex items-start gap-2.5">
+                <Trophy size={18} className="text-amber-600 shrink-0 mt-0.5" />
+                <p>
+                  <strong>Un classement de référence :</strong> Le Palmarès Kharandi est le baromètre national reconnu pour orienter les familles et valoriser l'excellence des établissements scolaires en Guinée.
+                </p>
+              </div>
+            </div>
+
+            <div className="md:col-span-5 bg-gradient-to-br from-amber-500/10 via-yellow-500/5 to-amber-600/10 border-2 border-amber-400/60 rounded-[32px] p-8 shadow-xl relative flex flex-col justify-between h-full min-h-[380px]">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/10 rounded-full -mr-6 -mt-6 overflow-hidden" />
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-amber-500 to-yellow-600 text-white text-[11px] font-black uppercase tracking-wider px-4 py-1.5 rounded-full shadow-md z-10">
+                Offre Palmarès
+              </div>
+
+              <div className="mt-4">
+                <p className="text-xs font-black text-amber-900/60 uppercase tracking-wider mb-1">Tarif Annuel</p>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-4xl md:text-5xl font-black text-slate-900 leading-none">250 000</span>
+                  <span className="text-xl font-bold text-slate-500">GNF</span>
+                  <span className="text-slate-400 font-extrabold text-xs ml-1">/ an</span>
+                </div>
+                <p className="text-xs font-bold text-amber-800 bg-amber-100/80 inline-block px-2.5 py-1 rounded-lg mt-2 border border-amber-200">
+                  Accès illimité 365 jours
+                </p>
+              </div>
+
+              <div className="h-[1px] bg-amber-200/50 my-6" />
+
+              <div className="space-y-4">
+                <button
+                  onClick={() => handleDirectPayment(250000, "Abonnement Pass Palmarès National — 250 000 GNF/an")}
+                  disabled={loading}
+                  className="w-full py-4 text-sm font-black text-white bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 rounded-2xl shadow-lg shadow-amber-500/20 transform hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  {loading ? (
+                    <><Loader2 className="animate-spin" size={18} /> Génération du paiement...</>
+                  ) : (
+                    <>S'abonner au Palmarès (250 000 GNF/an) <ArrowRight size={16} /></>
                   )}
                 </button>
                 <p className="text-[10px] text-center text-slate-400 font-extrabold uppercase">
@@ -721,7 +802,7 @@ export const Subscription: React.FC = () => {
                <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-green-500 rounded-full shrink-0"></span> <span className="font-bold text-slate-700">Résultats d'examens</span></li>
                <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-green-500 rounded-full shrink-0"></span> <span className="font-bold text-slate-700">Bourses d'études</span></li>
                <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-green-500 rounded-full shrink-0"></span> <span className="font-bold text-slate-700">Études à l'étranger</span></li>
-               <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-green-500 rounded-full shrink-0"></span> <span className="font-bold text-slate-700">Palmarès des écoles</span></li>
+               <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-green-500 rounded-full shrink-0"></span> <span className="font-bold text-amber-900 bg-amber-50 px-2 py-0.5 rounded border border-amber-200/60">Palmarès des écoles (Payant — 250 000 GNF/an)</span></li>
                <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-green-500 rounded-full shrink-0"></span> <span className="font-bold text-slate-700">Actualités scolaires</span></li>
                <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-green-500 rounded-full shrink-0"></span> <span className="font-bold text-slate-700">Marketplace</span></li>
                <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-green-500 rounded-full shrink-0"></span> <span className="font-bold text-slate-700">Bons Plans</span></li>

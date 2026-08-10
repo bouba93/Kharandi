@@ -240,7 +240,7 @@ export const HomeContent: React.FC<{
               />
               <QuickAccessCard 
                  title="Palmarès des écoles"
-                 subtitle="Classement des établissements par performances et résultats"
+                 subtitle="Classement officiel des établissements (Payant — 250 000 GNF/an)"
                  icon={Trophy}
                  kIcon="palmares"
                  color="bg-accent"
