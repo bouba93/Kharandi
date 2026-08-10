@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, GraduationCap, Building2, MapPin, Award, Smartphone, Facebook, Twitter, Link, Check, ArrowLeft, Newspaper, HelpCircle, FileSpreadsheet, Download, ExternalLink, Eye, EyeOff, FileText, BookOpen } from 'lucide-react';
 import { EduLoading } from './EduLoading';
+import { KharandiIcon } from '../icons/KharandiIcon';
 
 export const StandaloneResultsReader: React.FC = () => {
   const [copied, setCopied] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [examResults, setExamResults] = useState<any[]>([]);
+  const [totalCount, setTotalCount] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const [searchFilter, setSearchFilter] = useState('all'); // all, noms, pv, centre
   const [selectedResult, setSelectedResult] = useState<any | null>(null);
@@ -72,11 +74,11 @@ export const StandaloneResultsReader: React.FC = () => {
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
   };
 
-  const [displayLimit, setDisplayLimit] = useState(50);
+  const [displayLimit, setDisplayLimit] = useState(100);
 
   // Reset limit when filter or search changes
   useEffect(() => {
-    setDisplayLimit(50);
+    setDisplayLimit(100);
   }, [activeExamTab, searchFilter, searchQuery]);
 
   // Handle Search across exam categories (auto-loads when empty query)
@@ -89,9 +91,15 @@ export const StandaloneResultsReader: React.FC = () => {
       setLoading(true);
       const examParam = activeExamTab === 'ALL' ? 'all' : activeExamTab.toLowerCase();
       fetch(`/api/results/search?q=${encodeURIComponent(searchQuery.trim())}&exam=${examParam}&filter=${searchFilter}&limit=${displayLimit}`)
-        .then(res => res.json())
+        .then(res => {
+          const totalHeader = res.headers.get('X-Total-Count');
+          if (totalHeader) setTotalCount(parseInt(totalHeader, 10));
+          return res.json();
+        })
         .then(data => {
-          setExamResults(Array.isArray(data) ? data : []);
+          const items = Array.isArray(data) ? data : (data.results || []);
+          setExamResults(items);
+          if (data.total) setTotalCount(data.total);
         })
         .catch(err => {
           console.error("Error fetching exam results:", err);
@@ -129,7 +137,10 @@ export const StandaloneResultsReader: React.FC = () => {
 
       <header className="max-w-4xl mx-auto px-4 pt-8 md:pt-12 text-center pb-8 border-b-4 border-double border-slate-900/10">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-mono uppercase tracking-widest text-slate-500 mb-6 pb-4 border-b border-slate-900/5">
-          <div className="font-bold flex items-center gap-1.5"><Newspaper size={14} className="text-[#18bfd6]" /> KHARANDI INFOS</div>
+          <div className="font-bold flex items-center gap-2">
+            <KharandiIcon name="actualites" size={28} showBookmark={false} />
+            <span>KHARANDI INFOS</span>
+          </div>
           <button 
             onClick={returnToPortal}
             id="back-to-home-btn"
@@ -324,13 +335,20 @@ export const StandaloneResultsReader: React.FC = () => {
           </div>
         ) : (
           <div className="space-y-4 mb-12">
-            <div className="flex items-center justify-between px-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between px-2 gap-2">
               <p className="text-sm font-bold text-slate-600">
                 {searchQuery.trim() 
-                  ? `${examResults.length} candidat(s) admis trouvé(s) pour "${searchQuery}"`
-                  : `Affichage des ${examResults.length} premiers candidats admis (${activeExamTab !== 'ALL' ? activeExamTab : 'Tous les examens'})`}
+                  ? `Affichage de ${examResults.length} sur ${totalCount || examResults.length} candidat(s) trouvé(s) pour "${searchQuery}"`
+                  : `Affichage de ${examResults.length} sur ${totalCount || examResults.length} candidats admis (${activeExamTab !== 'ALL' ? activeExamTab : 'Tous les examens'})`}
               </p>
-              <span className="text-xs font-mono text-slate-400">Base nationale 2026</span>
+              {totalCount > examResults.length && (
+                <button
+                  onClick={() => setDisplayLimit(totalCount || 10000)}
+                  className="text-xs font-bold text-[#18bfd6] hover:underline cursor-pointer text-left sm:text-right"
+                >
+                  Tout afficher ({totalCount} candidats)
+                </button>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -417,14 +435,22 @@ export const StandaloneResultsReader: React.FC = () => {
               </AnimatePresence>
             </div>
 
-            {examResults.length >= displayLimit && (
-              <div className="text-center pt-6">
+            {(examResults.length >= displayLimit || (totalCount > examResults.length)) && (
+              <div className="flex flex-wrap items-center justify-center gap-3 pt-6">
                 <button
-                  onClick={() => setDisplayLimit(prev => prev + 50)}
+                  onClick={() => setDisplayLimit(prev => prev + 100)}
                   className="px-6 py-3.5 bg-slate-900 hover:bg-[#18bfd6] text-white text-xs font-black uppercase tracking-wider rounded-2xl transition-all shadow-md cursor-pointer inline-flex items-center gap-2"
                 >
-                  Charger plus de résultats (+50)
+                  Charger +100 candidats
                 </button>
+                {totalCount > examResults.length && (
+                  <button
+                    onClick={() => setDisplayLimit(totalCount || 10000)}
+                    className="px-6 py-3.5 bg-[#18bfd6] hover:bg-[#159cb0] text-white text-xs font-black uppercase tracking-wider rounded-2xl transition-all shadow-md cursor-pointer inline-flex items-center gap-2"
+                  >
+                    Tout afficher ({totalCount} candidats)
+                  </button>
+                )}
               </div>
             )}
           </div>

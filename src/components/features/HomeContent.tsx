@@ -33,6 +33,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { toast } from 'sonner';
 import { HomeSkeleton } from '../ui/Skeleton';
+import { KharandiIcon, KharandiIconName } from '../icons/KharandiIcon';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -189,6 +190,7 @@ export const HomeContent: React.FC<{
                  title="Résultats d'examens"
                  subtitle="Résultats officiels (BEPC, BAC, concours) en temps réel"
                  icon={Award}
+                 kIcon="examen"
                  color="bg-primary"
                  textColor="text-primary"
                  delay={0.1}
@@ -198,6 +200,7 @@ export const HomeContent: React.FC<{
                  title="Bourses"
                  subtitle="Répertoire des bourses selon le niveau, le profil et les ambitions"
                  icon={Briefcase}
+                 kIcon="bourse"
                  color="bg-secondary"
                  textColor="text-secondary"
                  delay={0.2}
@@ -207,6 +210,7 @@ export const HomeContent: React.FC<{
                  title="Actualités scolaires"
                  subtitle="Examens, réformes, opportunités — Guinée et international"
                  icon={Newspaper}
+                 kIcon="actualites"
                  color="bg-accent"
                  textColor="text-accent"
                  delay={0.3}
@@ -216,6 +220,7 @@ export const HomeContent: React.FC<{
                  title="Marketplace"
                  subtitle="Accès en lecture à l'espace de dépense des points"
                  icon={ShoppingBag}
+                 kIcon="boutique"
                  color="bg-primary"
                  textColor="text-primary"
                  delay={0.4}
@@ -227,6 +232,7 @@ export const HomeContent: React.FC<{
                  title="Études à l'étranger"
                  subtitle="Programmes, universités et opportunités d'études internationales"
                  icon={Globe}
+                 kIcon="voyage"
                  color="bg-secondary"
                  textColor="text-secondary"
                  delay={0.5}
@@ -236,6 +242,7 @@ export const HomeContent: React.FC<{
                  title="Palmarès des écoles"
                  subtitle="Classement des établissements par performances et résultats"
                  icon={Trophy}
+                 kIcon="palmares"
                  color="bg-accent"
                  textColor="text-accent"
                  delay={0.6}
@@ -245,6 +252,7 @@ export const HomeContent: React.FC<{
                  title="Bons Plans"
                  subtitle="Offres ciblées, publicités éducatives et opportunités personnalisées"
                  icon={Gift}
+                 kIcon="partenaire"
                  color="bg-primary"
                  textColor="text-primary"
                  delay={0.7}
@@ -257,6 +265,7 @@ export const HomeContent: React.FC<{
                  title="Parcours (Gratuit)"
                  subtitle="Chaque type d'utilisateur peut visualiser le chemin qui lui est propre et les fonctionnalités qui lui sont dédiées à travers des vidéos et visuels explicatifs"
                  icon={Users}
+                 kIcon="eleve"
                  color="bg-secondary"
                  textColor="text-secondary"
                  delay={0.8}
@@ -266,6 +275,7 @@ export const HomeContent: React.FC<{
                  title="Calcul mental — Abacus"
                  subtitle="Boulier japonais Soroban, leçons guidées et entraînement Anzan flash"
                  icon={Brain}
+                 kIcon="abacus"
                  color="bg-[#18bfd6]"
                  textColor="text-[#18bfd6]"
                  delay={0.9}
@@ -328,7 +338,7 @@ export const HomeContent: React.FC<{
 };
 
 // Sub-components
-const QuickAccessCard = ({ title, subtitle, icon: Icon, color, textColor, delay, onClick, premium, imageUrl }: any) => (
+const QuickAccessCard = ({ title, subtitle, icon: Icon, kIcon, color, textColor, delay, onClick, premium, imageUrl }: any) => (
   <motion.div
      variants={itemVariants}
      whileHover={{ y: -8, scale: 1.02 }}
@@ -344,8 +354,14 @@ const QuickAccessCard = ({ title, subtitle, icon: Icon, color, textColor, delay,
        <div className={`absolute top-0 right-0 w-24 h-24 ${color} opacity-5 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-150 duration-500`} />
      )}
      <div className="flex items-start justify-between">
-        <div className={`w-12 h-12 rounded-[18px] flex items-center justify-center ${color} bg-opacity-10 mb-4`}>
-           <Icon size={24} className={textColor} />
+        <div className="mb-4">
+          {kIcon ? (
+            <KharandiIcon name={kIcon} size={42} showBookmark={false} />
+          ) : (
+            <div className={`w-12 h-12 rounded-[18px] flex items-center justify-center ${color} bg-opacity-10`}>
+               <Icon size={24} className={textColor} />
+            </div>
+          )}
         </div>
         {premium && (
            <div className="bg-slate-100 p-1.5 rounded-xl text-slate-400">

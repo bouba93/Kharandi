@@ -162,7 +162,7 @@ const deepseekClient = new OpenAI({
   apiKey: process.env.DEEPSEEK_API_KEY || ''
 });
 
-import { loadAllExamResults, searchExamResults } from "./src/api/allExamResults.js";
+import { loadAllExamResults, searchExamResults, searchExamResultsWithTotal } from "./src/api/allExamResults.js";
 
 // Load all national exam results (CEE, BEPC EG, BEPC FA, BAC) in background
 loadAllExamResults().catch(console.error);
@@ -173,10 +173,16 @@ app.get("/api/results/search", async (req, res) => {
     const query = req.query.q?.toString().trim() || '';
     const exam = req.query.exam?.toString().trim() || 'all'; // 'all', 'cee', 'bepc', 'bepc_fa', 'bac'
     const filter = req.query.filter?.toString() || 'all'; // 'all', 'pv', 'centre', 'noms'
-    const limit = parseInt(req.query.limit?.toString() || '50');
+    const limit = parseInt(req.query.limit?.toString() || '100');
 
-    const matched = await searchExamResults(query, exam, filter, limit);
-    res.json(matched);
+    const { results, total } = await searchExamResultsWithTotal(query, exam, filter, limit);
+    res.setHeader('X-Total-Count', total.toString());
+    
+    if (req.query.format === 'object') {
+      res.json({ results, total, limit });
+    } else {
+      res.json(results);
+    }
   } catch (error) {
     console.error("Exam search error:", error);
     res.status(500).json({ error: "Erreur lors de la recherche des résultats", details: error instanceof Error ? error.message : String(error) });

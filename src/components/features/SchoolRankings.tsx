@@ -33,25 +33,15 @@ export const SchoolRankings: React.FC = () => {
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 text-left animate-fade-in">
       
-      {/* HERO HEADER - COULEURS KHARANDI */}
-      <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-r from-[#18bfd6] via-[#129bb0] to-[#0d6f7e] p-8 md:p-12 text-white shadow-xl">
-        <div className="absolute -right-12 -bottom-12 w-80 h-80 bg-[#fcb303]/25 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none" />
-        
-        <div className="relative z-10 max-w-3xl space-y-4">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/20 backdrop-blur border border-white/30 text-yellow-200 font-extrabold text-xs uppercase tracking-wider">
-            <Trophy size={14} className="text-[#fcb303]" />
-            <span>Édition Officielle 2026</span>
-          </div>
-
-          <h1 className="text-3xl md:text-5xl font-black tracking-tight leading-tight">
-            Palmarès National des Écoles de Guinée
-          </h1>
-
-          <p className="text-sm md:text-base text-cyan-50 font-medium leading-relaxed">
-            Reconnaître l'engagement, valoriser l'excellence éducative et guider la communauté scolaire sur l'ensemble du territoire national.
-          </p>
-        </div>
+      {/* HERO HEADER - COULEURS KHARANDI AVEC IMAGE DE COUVERTURE */}
+      <div className="relative overflow-hidden rounded-[32px] bg-slate-900 shadow-xl">
+        {/* Image de couverture Google Drive */}
+        <img 
+          src="https://lh3.googleusercontent.com/d/175IT_yx9FJRcBEbJ468jf8stdT1_HWMb" 
+          alt="Palmarès Kharandi Couverture" 
+          className="w-full h-auto object-cover object-center"
+          referrerPolicy="no-referrer"
+        />
       </div>
 
       {/* INTRODUCTORY PRESENTATION SECTION */}

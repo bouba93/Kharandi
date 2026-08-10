@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Bell, BookOpen, Home, User, Menu, X, ShoppingBag, ShoppingCart, CreditCard, MessageCircle, Shield, ShieldCheck, MessageSquare, PenTool, GraduationCap, Users, Newspaper, Award, LogOut, Lock, Globe, Trophy, Briefcase, Wallet as WalletIcon, ArrowLeft, Brain } from 'lucide-react';
+import { KharandiIcon, KharandiIconName } from '../icons/KharandiIcon';
 import { motion, AnimatePresence } from 'motion/react';
 import { Marketplace } from './Marketplace';
 import { SellerDashboard } from './SellerDashboard';
@@ -25,6 +26,7 @@ import { Results } from './Results';
 import { Onboarding } from './Onboarding';
 import { UserParcours } from './UserParcours';
 import { AbacusModule } from './abacus/AbacusModule';
+import { Wallet } from './Wallet';
 import { OnboardingTutorial, useOnboarding } from './OnboardingTutorial';
 import { useAuth } from '../../contexts/AuthContext';
 import { toast } from 'sonner';
@@ -34,6 +36,7 @@ const tabToPath: Record<string, string> = {
   'Accueil': '/',
   'Sujets et traités': '/biblio',
   'Exo Gagnant': '/exercices',
+  'Mon Wallet': '/wallet',
   'Kharandi École': '/notes',
   'Répétiteurs': '/repetiteurs',
   'Kharandi Makiti': '/marche',
@@ -171,6 +174,7 @@ export const Dashboard: React.FC = () => {
       'Palmarès',
       'Actualités',
       'Exo Gagnant',
+      'Mon Wallet',
       'Onboarding'
     ];
     
@@ -212,6 +216,8 @@ export const Dashboard: React.FC = () => {
         return <Library initialSearchQuery={searchQuery} initialCourseId={selectedCourseId} onCourseClose={() => setSelectedCourseId(null)} onOpenKaramo={openKaramoWithContext} setActiveTab={setActiveTab} />;
       case 'Exo Gagnant':
         return <Exercises />;
+      case 'Mon Wallet':
+        return <Wallet setActiveTab={setActiveTab} />;
       case 'Kharandi École':
         return <Grades />;
       case 'Répétiteurs':
@@ -249,25 +255,24 @@ export const Dashboard: React.FC = () => {
     }
   };
 
-  const navItems = [
-    { id: 'Accueil', icon: Home },
-    { id: 'Sujets et traités', icon: BookOpen, roles: ['student', 'eleve', 'parent', 'admin', 'teacher', 'repetiteur'] },
-    { id: 'Calcul mental', icon: Brain, roles: ['student', 'eleve', 'parent', 'admin', 'teacher', 'repetiteur'] },
-    { id: 'Exo Gagnant', icon: PenTool, roles: ['student', 'eleve', 'admin'] },
-    { id: 'Mon Wallet', icon: WalletIcon, roles: ['student', 'eleve', 'admin'] },
-    { id: 'Répétiteurs', icon: Users, premium: true, roles: ['student', 'eleve', 'parent', 'admin'] },
-    { id: 'Kharandi École', icon: GraduationCap, premium: true, roles: ['student', 'eleve', 'parent', 'admin', 'ecole'] },
-    { id: 'Résultats', icon: Award, roles: ['student', 'eleve', 'parent', 'admin'] },
-    { id: 'Bourses', icon: Briefcase, roles: ['student', 'eleve', 'parent', 'admin'] },
-    { id: 'Études à l’étranger', icon: Globe, roles: ['student', 'eleve', 'parent', 'admin'] },
-    { id: 'Palmarès', icon: Trophy, roles: ['student', 'eleve', 'parent', 'admin'] },
-    { id: 'Actualités', icon: Newspaper, roles: ['student', 'eleve', 'parent', 'admin'] },
-    { id: 'Kharandi Makiti', icon: ShoppingBag },
-    { id: 'Messages', icon: MessageCircle, premium: true },
-    { id: 'Abonnements', icon: CreditCard },
-    { id: 'Notifs', icon: Bell, badge: true },
-    { id: 'Support', icon: MessageSquare },
-    { id: 'Dashboard utilisateur', icon: User }
+  const navItems: Array<{ id: string; icon: any; kIcon: KharandiIconName; roles?: string[]; premium?: boolean; badge?: boolean }> = [
+    { id: 'Accueil', icon: Home, kIcon: 'accueil' as KharandiIconName },
+    { id: 'Sujets et traités', icon: BookOpen, kIcon: 'cours' as KharandiIconName, roles: ['student', 'eleve', 'parent', 'admin', 'teacher', 'repetiteur'] },
+    { id: 'Calcul mental', icon: Brain, kIcon: 'abacus' as KharandiIconName, roles: ['student', 'eleve', 'parent', 'admin', 'teacher', 'repetiteur'] },
+    { id: 'Exo Gagnant', icon: PenTool, kIcon: 'exercices' as KharandiIconName, roles: ['student', 'eleve', 'admin'] },
+    { id: 'Mon Wallet', icon: WalletIcon, kIcon: 'portefeuille' as KharandiIconName, roles: ['student', 'eleve', 'parent', 'admin', 'teacher', 'repetiteur', 'seller', 'ecole'] },
+    { id: 'Répétiteurs', icon: Users, kIcon: 'enseignant' as KharandiIconName, premium: true, roles: ['student', 'eleve', 'parent', 'admin'] },
+    { id: 'Résultats', icon: Award, kIcon: 'examen' as KharandiIconName, roles: ['student', 'eleve', 'parent', 'admin'] },
+    { id: 'Bourses', icon: Briefcase, kIcon: 'bourse' as KharandiIconName, roles: ['student', 'eleve', 'parent', 'admin'] },
+    { id: 'Études à l’étranger', icon: Globe, kIcon: 'voyage' as KharandiIconName, roles: ['student', 'eleve', 'parent', 'admin'] },
+    { id: 'Palmarès', icon: Trophy, kIcon: 'palmares' as KharandiIconName, roles: ['student', 'eleve', 'parent', 'admin'] },
+    { id: 'Actualités', icon: Newspaper, kIcon: 'actualites' as KharandiIconName, roles: ['student', 'eleve', 'parent', 'admin'] },
+    { id: 'Kharandi Makiti', icon: ShoppingBag, kIcon: 'boutique' as KharandiIconName },
+    { id: 'Messages', icon: MessageCircle, kIcon: 'discussion' as KharandiIconName, premium: true },
+    { id: 'Abonnements', icon: CreditCard, kIcon: 'abonnement' as KharandiIconName },
+    { id: 'Notifs', icon: Bell, kIcon: 'notifications' as KharandiIconName, badge: true },
+    { id: 'Support', icon: MessageSquare, kIcon: 'aide' as KharandiIconName },
+    { id: 'Dashboard utilisateur', icon: User, kIcon: 'profil' as KharandiIconName }
   ].filter(item => {
     if (isGuest && ['Messages', 'Notifs', 'Support', 'Abonnements', 'Kharandi École', 'Exo Gagnant'].includes(item.id)) return false;
     
@@ -295,7 +300,7 @@ export const Dashboard: React.FC = () => {
   );
 
   if (role === 'admin' && !isGuest) {
-    navItems.push({ id: 'Administration', icon: Shield, badge: false });
+    navItems.push({ id: 'Administration', icon: Shield, kIcon: 'tableau_de_bord', badge: false });
   }
 
   const roleTranslations: Record<string, string> = {
@@ -370,12 +375,22 @@ export const Dashboard: React.FC = () => {
                   isActive ? 'bg-primary text-white shadow-md' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
                 }`}
               >
-                <div className="relative z-10">
-                  <item.icon 
-                    size={22} 
-                    strokeWidth={isActive ? 2.5 : 2}
-                    fill={isActive ? 'currentColor' : 'none'}
-                  />
+                <div className="relative z-10 flex items-center justify-center">
+                  {item.kIcon ? (
+                    <KharandiIcon 
+                      name={item.kIcon} 
+                      size={26} 
+                      showBackground={false} 
+                      showBookmark={false} 
+                      primaryColor={isActive ? '#FFFFFF' : '#163B45'} 
+                    />
+                  ) : (
+                    <item.icon 
+                      size={22} 
+                      strokeWidth={isActive ? 2.5 : 2}
+                      fill={isActive ? 'currentColor' : 'none'}
+                    />
+                  )}
                   {item.badge && !isActive && (
                     <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#C0392B] rounded-full border-2 border-white" />
                   )}

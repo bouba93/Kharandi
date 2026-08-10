@@ -2,7 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import { parse } from 'csv-parse/sync';
 
-// Ensure root data directory exists
 const dataDir = path.join(process.cwd(), 'data');
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
@@ -39,124 +38,155 @@ if (fs.existsSync(ceeCsvPath)) {
 console.log(`CEE entries: ${ceeResults.length}`);
 fs.writeFileSync(path.join(dataDir, 'results_cee.json'), JSON.stringify(ceeResults));
 
-// Helper for parsing raw text lines from PDF extractions
-function parsePdfRawLines(filePath, examType, defaultExamTitle) {
+// DPE list for BEPC
+const bepcDpes = [
+  'BOKE', 'BOFFA', 'FRIA', 'GAOUAL', 'KOUNDARA',
+  'KALOUM', 'DIXINN', 'MATAM', 'RATOMA', 'MATOTO', 'CONAKRY',
+  'FARANAH', 'DABOLA', 'DINGUIRAYE', 'KISSIDOUGOU',
+  'KANKAN', 'KEROUANE', 'KOUROUSSA', 'MANDIANA', 'SIGUIRI',
+  'KINDIA', 'COYAH', 'DUBREKA', 'FORECARIAH', 'FORACARIAH', 'TELIMELE',
+  'LABE', 'KOUBIA', 'LELOUMA', 'MALI', 'TOUGUE',
+  'MAMOU', 'DALABA', 'PITA',
+  'NZEREKORE', "N'ZEREKORE", 'BEYLA', 'GUECKEDOU', 'LOLA', 'MACENTA', 'YOMOU'
+];
+
+// Options for BAC
+const bacOptions = ['SS-FA', 'SE-FA', 'SM-FA', 'SS', 'SE', 'SM', 'A-FA', 'L-FA'];
+
+const mentionsList = ['TBIEN', 'BIEN', 'ABIEN', 'PASSABLE', 'EXCELLENT'];
+
+function parsePdfRawLinesLineStart(filePath, prefixList, examType, defaultExamTitle) {
   if (!fs.existsSync(filePath)) {
     console.warn(`File ${filePath} not found`);
     return [];
   }
+
   const rawText = fs.readFileSync(filePath, 'utf-8');
-  const lines = rawText.split('\n').map(l => l.trim()).filter(Boolean);
-  const records = [];
+  const rawLines = rawText.split('\n').map(l => l.trim());
 
-  const mentions = ['TBIEN', 'BIEN', 'ABIEN', 'PASSABLE', 'EXCELLENT'];
-
-  for (const line of lines) {
-    if (
-      line.startsWith('Résultats') || 
-      line.startsWith('RESULTATS') || 
-      line.includes('SESSION 2026') || 
-      line.includes('Page ') || 
-      line.startsWith('-- ') || 
-      line.includes('Prénoms et Noms')
-    ) {
-      continue;
+  // Filter headers / footers
+  const cleanLines = rawLines.filter(l => {
+    if (!l) return false;
+    if (l.startsWith('Résultats') || l.startsWith('RESULTATS') || l.includes('SESSION 2026') || 
+        l.includes('ENSEIGNEMENT') || l.includes('Page ') || l.startsWith('-- ') || 
+        l.includes('Prénoms et Noms') || l.includes('Options Rang') || l.includes('Ire Rang')) {
+      return false;
     }
+    return true;
+  });
 
-    // Try extracting mention at the end
+  const escapedPrefixes = prefixList.map(p => p.replace("'", "\\x27"));
+  const startRegex = new RegExp('^(' + escapedPrefixes.join('|') + ')\\s+(\\d{1,6})\\s*(X)?\\s+', 'i');
+
+  const rawEntries = [];
+  let buffer = [];
+
+  for (const line of cleanLines) {
+    if (startRegex.test(line) && buffer.length > 0) {
+      rawEntries.push(buffer.join(' '));
+      buffer = [];
+    }
+    buffer.push(line);
+  }
+  if (buffer.length > 0) {
+    rawEntries.push(buffer.join(' '));
+  }
+
+  console.log(`[${examType}] Total candidate raw records: ${rawEntries.length}`);
+
+  const results = [];
+
+  for (const entry of rawEntries) {
+    let working = entry.trim();
+
+    // 1. Extract Mention
     let mention = 'ADMIS';
-    let workingLine = line;
-
-    for (const m of mentions) {
-      if (workingLine.endsWith(m)) {
+    for (const m of mentionsList) {
+      if (working.endsWith(m)) {
         mention = m === 'ABIEN' ? 'Assez Bien' : m === 'TBIEN' ? 'Très Bien' : m;
-        workingLine = workingLine.slice(0, -m.length).trim();
+        working = working.slice(0, -m.length).trim();
         break;
       }
     }
 
-    // Match numbers and text patterns
-    // e.g., "MAMOU 1 MARIAMA BAH LYCEE FETO 1967 HADJA FTA BTA BALDE"
-    // or "SS-FA 1 DAOUDA CAMARA KK-IV-MATOTO 3074 HADJAKANINGBESIDIBE"
-    // Find PV (usually 3 to 6 digits)
-    const pvMatch = workingLine.match(/\b(\d{3,7})\b/);
-    if (!pvMatch) continue;
+    // 2. Match start
+    const matchStart = working.match(startRegex);
+    if (!matchStart) continue;
 
-    const pv = pvMatch[1];
-    const pvIndex = workingLine.lastIndexOf(pv);
-    const beforePv = workingLine.substring(0, pvIndex).trim();
-    const afterPv = workingLine.substring(pvIndex + pv.length).trim();
+    const dpeOrOpt = matchStart[1].trim().toUpperCase();
+    const rang = matchStart[2];
+    const ex = matchStart[3] || '';
+    const rest = working.substring(matchStart[0].length).trim();
 
-    // Parse beforePv: [Region/DPE or Option] [Rang] [ex] [Noms...] [Centre...]
-    // Find the first numbers which indicate the Rang
-    const rangMatch = beforePv.match(/^([A-Za-z0-9\/-]+)?\s*(\d+)\s*(X)?\s*(.+)$/);
-    
-    let dpeOrOption = '';
-    let rang = '';
-    let ex = '';
-    let restBeforePv = beforePv;
-
-    if (rangMatch) {
-      dpeOrOption = rangMatch[1] || '';
-      rang = rangMatch[2] || '';
-      ex = rangMatch[3] || '';
-      restBeforePv = rangMatch[4] || '';
-    }
-
-    // Rest before PV contains Nom and Centre. Often Centre starts with LYCEE, COLLEGE, GS, FA, CABRAL, etc. or is capitalized
-    // Let's use a heuristic for Nom vs Centre
-    let noms = restBeforePv;
+    // 3. Find PV (sequence of 3 to 7 digits)
+    const pvMatches = [...rest.matchAll(/\b(\d{3,7})\b/g)];
+    let pv = '';
+    let noms = rest;
     let centre = 'Non spécifié';
+    let origine = '';
 
-    const centreKeywords = ['LYCEE', 'COLLEGE', 'GS', 'FA ', 'CABRAL', 'DITINN', 'DJISSOUMA', 'DUCAL', 'DONGHOL', 'SCHOOL', 'COMPLEXE'];
-    let minCentreIdx = -1;
-    let foundKw = '';
+    if (pvMatches.length > 0) {
+      const lastPvMatch = pvMatches[pvMatches.length - 1];
+      pv = lastPvMatch[1];
+      const pvIdx = rest.lastIndexOf(pv);
 
-    for (const kw of centreKeywords) {
-      const idx = restBeforePv.indexOf(kw);
-      if (idx > 0 && (minCentreIdx === -1 || idx < minCentreIdx)) {
-        minCentreIdx = idx;
-        foundKw = kw;
+      const beforePv = rest.substring(0, pvIdx).trim();
+      const afterPv = rest.substring(pvIdx + pv.length).trim();
+
+      origine = afterPv;
+
+      const centreKeywords = [
+        'LYCEE', 'COLLEGE', 'GS ', 'GS-', 'FA ', 'CABRAL', 'DITINN', 'DJISSOUMA', 
+        'DUCAL', 'DONGHOL', 'SCHOOL', 'COMPLEXE', 'COL ', 'KK-', 'COMMUNAL'
+      ];
+      let minIdx = -1;
+      for (const kw of centreKeywords) {
+        const idx = beforePv.indexOf(kw);
+        if (idx > 0 && (minIdx === -1 || idx < minIdx)) {
+          minIdx = idx;
+        }
+      }
+
+      if (minIdx > 0) {
+        noms = beforePv.substring(0, minIdx).trim();
+        centre = beforePv.substring(minIdx).trim();
+      } else {
+        noms = beforePv;
       }
     }
 
-    if (minCentreIdx > 0) {
-      noms = restBeforePv.substring(0, minCentreIdx).trim();
-      centre = restBeforePv.substring(minCentreIdx).trim();
-    }
-
-    records.push({
+    results.push({
       exam: examType,
       examTitle: defaultExamTitle,
-      dpe: dpeOrOption,
+      dpe: dpeOrOpt,
       rang: rang,
       ex: ex,
       noms: noms,
       centre: centre,
       pv: pv,
-      origine: afterPv || centre,
+      origine: origine || centre,
       mention: mention
     });
   }
 
-  return records;
+  return results;
 }
 
 // 2. Process BEPC Franco-Arabe
 console.log('--- Processing BEPC Franco-Arabe ---');
-const bepcFaResults = parsePdfRawLines('bepc_fa_raw.txt', 'BEPC_FA', "BEPC Franco-Arabe 2026");
+const bepcFaResults = parsePdfRawLinesLineStart('bepc_fa_raw.txt', bepcDpes, 'BEPC_FA', "BEPC Franco-Arabe 2026");
 console.log(`BEPC Franco-Arabe entries: ${bepcFaResults.length}`);
 fs.writeFileSync(path.join(dataDir, 'results_bepc_fa.json'), JSON.stringify(bepcFaResults));
 
 // 3. Process BEPC Enseignement Général
 console.log('--- Processing BEPC Enseignement Général ---');
-const bepcEgResults = parsePdfRawLines('bepc_eg_raw.txt', 'BEPC', "BEPC Enseignement Général 2026");
+const bepcEgResults = parsePdfRawLinesLineStart('bepc_eg_raw.txt', bepcDpes, 'BEPC', "BEPC Enseignement Général 2026");
 console.log(`BEPC General entries: ${bepcEgResults.length}`);
 fs.writeFileSync(path.join(dataDir, 'results_bepc_eg.json'), JSON.stringify(bepcEgResults));
 
 // 4. Process BAC 2026
 console.log('--- Processing BAC 2026 ---');
-const bacResults = parsePdfRawLines('bac_2026_raw.txt', 'BAC', "Baccalauréat Unique 2026");
+const bacResults = parsePdfRawLinesLineStart('bac_2026_raw.txt', bacOptions, 'BAC', "Baccalauréat Unique 2026");
 console.log(`BAC entries: ${bacResults.length}`);
 fs.writeFileSync(path.join(dataDir, 'results_bac_2026.json'), JSON.stringify(bacResults));
 

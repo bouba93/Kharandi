@@ -21,7 +21,7 @@ interface AITeacherChatProps {
   inline?: boolean;
 }
 
-const WELCOME = "Bonjour ! Je suis **Karamö**, ton prof virtuel. Je connais tout le programme guinéen. Pose-moi tes questions !";
+const WELCOME = "Bonjour ! Je suis **Karamo**, ton prof virtuel. Je connais tout le programme guinéen. Pose-moi tes questions !";
 
 const SUGGESTIONS = [
   "Explique-moi la dérivée",
@@ -136,7 +136,7 @@ export const AITeacherChat: React.FC<AITeacherChatProps> = ({ onClose, initialMe
       } catch {
         setMessages(prev => prev.map(m =>
           m.id === aiMsgId
-            ? { ...m, content: "⚠️ Karamö est indisponible. Réessaie dans quelques secondes.", streaming: false }
+            ? { ...m, content: "⚠️ Karamo est indisponible. Réessaie dans quelques secondes.", streaming: false }
             : m
         ));
       }
@@ -168,7 +168,7 @@ export const AITeacherChat: React.FC<AITeacherChatProps> = ({ onClose, initialMe
     initialSent.current = true;
 
     const prompt =
-      `Tu es Karamö. Un élève vient d'ouvrir ce sujet BAC.\n\n${initialMessage}\n\n` +
+      `Tu es Karamo. Un élève vient d'ouvrir ce sujet BAC.\n\n${initialMessage}\n\n` +
       `Présente brièvement le sujet puis pose une question pour évaluer ses connaissances. Méthode socratique.`;
 
     const userMsg: Message = {
@@ -205,7 +205,7 @@ export const AITeacherChat: React.FC<AITeacherChatProps> = ({ onClose, initialMe
               alt="Karamö" className="w-full h-full object-cover scale-110" referrerPolicy="no-referrer" />
           </div>
           <div>
-            <h2 className="font-extrabold text-[16px] text-slate-900 leading-tight">Karamö</h2>
+            <h2 className="font-extrabold text-[16px] text-slate-900 leading-tight">Karamo</h2>
             <p className="text-[12px] text-primary font-bold flex items-center gap-1.5">
               <span className={`w-1.5 h-1.5 rounded-full ${isStreaming ? 'bg-amber-400 animate-pulse' : 'bg-primary animate-pulse'}`} />
               {isStreaming ? 'En train d\'écrire...' : 'En ligne'}
@@ -279,7 +279,7 @@ export const AITeacherChat: React.FC<AITeacherChatProps> = ({ onClose, initialMe
                 </div>
                 <div className="px-4 py-3 bg-white border border-slate-100 rounded-[22px] rounded-tl-sm shadow-sm flex items-center gap-2">
                   <Loader2 size={16} className="animate-spin text-primary" />
-                  <span className="text-[13px] text-slate-400 font-bold">Karamö réfléchit...</span>
+                  <span className="text-[13px] text-slate-400 font-bold">Karamo réfléchit...</span>
                 </div>
               </div>
             </motion.div>

@@ -1,10 +1,11 @@
 {
-  "projectId": "kharandi-ed695",
-  "appId": "1:253001036113:web:7a3a3cf83f44e2e1aa2370",
-  "apiKey": "AIzaSyBxC8mbCib_fPrjguEih4ILhUhyCh3_l1I",
-  "authDomain": "kharandi-ed695.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-fa349435-8439-472c-ac56-0cd77c7e1b62",
-  "storageBucket": "kharandi-ed695.firebasestorage.app",
-  "messagingSenderId": "253001036113",
-  "measurementId": ""
+  "projectId": "aerobic-hook-nthgf",
+  "appId": "1:175223863030:web:9e5c47c26d58afd95cded7",
+  "apiKey": "AIzaSyDuu8DCMjuXvCyejR7x_DZEvuiD_F_OcwA",
+  "authDomain": "aerobic-hook-nthgf.firebaseapp.com",
+  "storageBucket": "aerobic-hook-nthgf.firebasestorage.app",
+  "messagingSenderId": "175223863030",
+  "measurementId": "",
+  "oAuthClientId": "175223863030-r6jfl35ouue0u87m9u8h8qgrrtq493g7.apps.googleusercontent.com",
+  "recaptchaSiteKey": ""
 }

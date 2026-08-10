@@ -15,8 +15,50 @@ export const Results: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchFilter, setSearchFilter] = useState('all'); // all, pv, centre, noms
   const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [totalCount, setTotalCount] = useState<number>(0);
   const [searchLoading, setSearchLoading] = useState(false);
   const [selectedResultModal, setSelectedResultModal] = useState<any | null>(null);
+  const [displayLimit, setDisplayLimit] = useState(100);
+
+  // Reset limit when filter or search changes
+  useEffect(() => {
+    setDisplayLimit(100);
+  }, [activeFilter, searchFilter, searchQuery]);
+
+  // Handle Search across all exam categories (auto-loads when empty query)
+  useEffect(() => {
+    if (searchQuery.trim().length === 1) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setSearchLoading(true);
+      let examParam = 'all';
+      if (activeFilter === 'CEE 2026') examParam = 'cee';
+      else if (activeFilter === 'BEPC') examParam = 'bepc';
+      else if (activeFilter === 'BEPC Franco-Arabe') examParam = 'bepc_fa';
+      else if (activeFilter === 'BAC') examParam = 'bac';
+
+      fetch(`/api/results/search?q=${encodeURIComponent(searchQuery.trim())}&exam=${examParam}&filter=${searchFilter}&limit=${displayLimit}`)
+        .then(res => {
+          const totalHeader = res.headers.get('X-Total-Count');
+          if (totalHeader) setTotalCount(parseInt(totalHeader, 10));
+          return res.json();
+        })
+        .then(data => {
+          const items = Array.isArray(data) ? data : (data.results || []);
+          setSearchResults(items);
+          if (data.total) setTotalCount(data.total);
+        })
+        .catch(err => {
+          console.error("Error fetching search results:", err);
+          setSearchResults([]);
+        })
+        .finally(() => setSearchLoading(false));
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery, searchFilter, activeFilter, displayLimit]);
 
   const officialExams = [
     {
@@ -60,14 +102,13 @@ export const Results: React.FC = () => {
       category: 'CEE 2026',
       title: "Résultats du Certificat d'Études Élémentaires (CEE) — 7ème Année 2026",
       subtitle: "Examen d'Entrée en 7ème Année (Primaire)",
-      description: "Base de données nationale nominative et liste des admis au CEE 2026.",
+      description: "Base de données nationale nominative et liste complète des 188 108 admis au CEE 2026.",
+      viewUrl: "https://docs.google.com/spreadsheets/d/1O6G8FYil3bJxVtxmGbO4iYCWEGoxDO88/edit?usp=drive_link",
       badgeColor: "bg-amber-500/10 text-amber-800 border-amber-200",
       accentBg: "from-amber-500/10 via-yellow-500/5 to-amber-600/10",
-      fileType: "Base Nominative Interactif"
+      fileType: "Google Sheets (188 108 admis)"
     }
   ];
-
-  const [displayLimit, setDisplayLimit] = useState(50);
 
   useEffect(() => {
     getResults()
@@ -75,40 +116,6 @@ export const Results: React.FC = () => {
       .catch(() => setResults([]))
       .finally(() => setLoading(false));
   }, []);
-
-  // Reset limit when filter or search changes
-  useEffect(() => {
-    setDisplayLimit(50);
-  }, [activeFilter, searchFilter, searchQuery]);
-
-  // Handle Search across all exam categories (auto-loads when empty query)
-  useEffect(() => {
-    if (searchQuery.trim().length === 1) {
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      setSearchLoading(true);
-      let examParam = 'all';
-      if (activeFilter === 'CEE 2026') examParam = 'cee';
-      else if (activeFilter === 'BEPC') examParam = 'bepc';
-      else if (activeFilter === 'BEPC Franco-Arabe') examParam = 'bepc_fa';
-      else if (activeFilter === 'BAC') examParam = 'bac';
-
-      fetch(`/api/results/search?q=${encodeURIComponent(searchQuery.trim())}&exam=${examParam}&filter=${searchFilter}&limit=${displayLimit}`)
-        .then(res => res.json())
-        .then(data => {
-          setSearchResults(Array.isArray(data) ? data : []);
-        })
-        .catch(err => {
-          console.error("Error fetching search results:", err);
-          setSearchResults([]);
-        })
-        .finally(() => setSearchLoading(false));
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [searchQuery, searchFilter, activeFilter, displayLimit]);
 
   const categories = ['TOUS', 'CEE 2026', 'BEPC', 'BEPC Franco-Arabe', 'BAC'];
 
@@ -224,12 +231,20 @@ export const Results: React.FC = () => {
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="flex items-center justify-between px-1">
-              <p className="text-xs font-bold text-slate-500">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between px-1 gap-2">
+              <p className="text-xs font-bold text-slate-600">
                 {searchQuery.trim() 
-                  ? `${searchResults.length} candidat(s) trouvé(s) pour "${searchQuery}"`
-                  : `Affichage des ${searchResults.length} premiers candidats admis (${activeFilter !== 'TOUS' ? activeFilter : 'Tous les examens'})`}
+                  ? `Affichage de ${searchResults.length} sur ${totalCount || searchResults.length} candidat(s) trouvé(s) pour "${searchQuery}"`
+                  : `Affichage de ${searchResults.length} sur ${totalCount || searchResults.length} candidats admis (${activeFilter !== 'TOUS' ? activeFilter : 'Tous les examens'})`}
               </p>
+              {totalCount > searchResults.length && (
+                <button
+                  onClick={() => setDisplayLimit(totalCount || 10000)}
+                  className="text-xs font-bold text-[#18bfd6] hover:underline cursor-pointer text-left sm:text-right"
+                >
+                  Afficher les {totalCount} candidats
+                </button>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -280,14 +295,22 @@ export const Results: React.FC = () => {
               </AnimatePresence>
             </div>
 
-            {searchResults.length >= displayLimit && (
-              <div className="text-center pt-4">
+            {(searchResults.length >= displayLimit || (totalCount > searchResults.length)) && (
+              <div className="flex flex-wrap items-center justify-center gap-3 pt-4">
                 <button
-                  onClick={() => setDisplayLimit(prev => prev + 50)}
+                  onClick={() => setDisplayLimit(prev => prev + 100)}
                   className="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white text-xs font-black uppercase tracking-wider rounded-2xl transition-all shadow-md cursor-pointer"
                 >
-                  Charger plus de résultats (+50)
+                  Charger +100 candidats
                 </button>
+                {totalCount > searchResults.length && (
+                  <button
+                    onClick={() => setDisplayLimit(totalCount || 10000)}
+                    className="px-6 py-3 bg-[#18bfd6] hover:bg-[#159cb0] text-white text-xs font-black uppercase tracking-wider rounded-2xl transition-all shadow-md cursor-pointer"
+                  >
+                    Tout afficher ({totalCount} candidats)
+                  </button>
+                )}
               </div>
             )}
           </div>
