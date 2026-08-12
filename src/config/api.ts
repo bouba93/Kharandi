@@ -1,5 +1,5 @@
 import axios from "axios";
-export const BASE_URL = import.meta.env.VITE_API_URL || "https://backfinal-xxxl.onrender.com/api/v1";
+export const BASE_URL = import.meta.env.VITE_API_URL || "http://212.95.33.158/api/v1";
 export const api = axios.create({ baseURL: BASE_URL, headers: { "Content-Type": "application/json" }, timeout: 60000 });
 let isRefreshing = false;
 let failedQueue: any[] = [];

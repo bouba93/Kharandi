@@ -63,7 +63,7 @@ app.get("/api/health", (req, res) => {
 });
 
 // Proxy definition for Django Backend (New v2.0)
-const DJANGO_BACKEND_URL = process.env.DJANGO_BACKEND_URL || 'https://backfinal-xxxl.onrender.com';
+const DJANGO_BACKEND_URL = process.env.DJANGO_BACKEND_URL || 'http://212.95.33.158';
 
 app.use('/api/django', createProxyMiddleware({
   target: DJANGO_BACKEND_URL,
