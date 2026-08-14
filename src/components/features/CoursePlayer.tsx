@@ -155,6 +155,25 @@ export const CoursePlayer: React.FC<{ courseId: string; onClose?: () => void }> 
                             currentChapter?.content?.toLowerCase().includes('solution') ||
                             currentChapter?.content?.toLowerCase().includes('barème');
 
+  // Helper to open Karamo with full rich context of the current subject
+  const triggerKaramo = (mode: 'explain' | 'quiz') => {
+    const title = currentChapter?.title || 'Sujet d\'examen';
+    const excerpt = currentChapter?.content ? currentChapter.content.slice(0, 800) : '';
+    
+    let prompt = '';
+    if (mode === 'explain') {
+      prompt = `Tu es Professeur Karamo, enseignant virtuel de référence pour le programme éducatif guinéen.\n` +
+        `Peux-tu m'expliquer étape par étape la méthode de résolution de ce sujet : "${title}" ?\n\n` +
+        (excerpt ? `Extrait de l'énoncé :\n"""\n${excerpt}\n"""\n\n` : '') +
+        `Sois très clair, donne les formules clés à retenir et les étapes ordonnées.`;
+    } else {
+      prompt = `Tu es Professeur Karamo. Pose-moi 3 questions d'entraînement ou QCM basées sur les notions clés du sujet "${title}" pour tester ma compréhension.`;
+    }
+
+    setKaramoPrompt(`${prompt} ###${Date.now()}`);
+    setShowKaramo(true);
+  };
+
   if (loading) return (
     <div className="flex flex-col items-center justify-center min-h-[450px]">
       <EduLoading message="Preparation du sujet et mise en page..." />
@@ -300,11 +319,8 @@ export const CoursePlayer: React.FC<{ courseId: string; onClose?: () => void }> 
           {/* Right Action Buttons */}
           <div className="flex items-center gap-2 shrink-0">
             <button
-              onClick={() => {
-                setKaramoPrompt(`Explique-moi étape par étape la résolution de ce sujet d'examen : "${currentChapter?.title}". Sois très pédagogique. ###${Date.now()}`);
-                setShowKaramo(true);
-              }}
-              className="px-2.5 sm:px-3 py-1.5 bg-[#FAB304] hover:bg-[#e0a103] text-[#163B45] rounded-xl text-xs font-black flex items-center gap-1.5 shadow-sm transition-all"
+              onClick={() => triggerKaramo('explain')}
+              className="px-2.5 sm:px-3 py-1.5 bg-[#FAB304] hover:bg-[#e0a103] text-[#163B45] rounded-xl text-xs font-black flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
             >
               <Bot size={15} />
               <span className="hidden sm:inline">Explication Prof. Karamo</span>
@@ -493,11 +509,8 @@ export const CoursePlayer: React.FC<{ courseId: string; onClose?: () => void }> 
                   </div>
                 </div>
                 <button
-                  onClick={() => {
-                    setKaramoPrompt(`Pose-moi 3 questions d'entraînement similaires au sujet "${currentChapter?.title}" pour vérifier si j'ai bien compris.`);
-                    setShowKaramo(true);
-                  }}
-                  className="w-full sm:w-auto px-4 py-2.5 bg-[#FAB304] hover:bg-[#e0a103] text-[#163B45] font-black rounded-xl text-xs shrink-0 shadow-md transition-all text-center"
+                  onClick={() => triggerKaramo('quiz')}
+                  className="w-full sm:w-auto px-4 py-2.5 bg-[#FAB304] hover:bg-[#e0a103] text-[#163B45] font-black rounded-xl text-xs shrink-0 shadow-md transition-all text-center cursor-pointer"
                 >
                   S'entraîner avec l'IA
                 </button>
@@ -582,27 +595,36 @@ export const CoursePlayer: React.FC<{ courseId: string; onClose?: () => void }> 
         </div>
       </div>
 
-      {/* Karamö Assistant Drawer (Desktop) */}
+      {/* Karamö Assistant Slide-over Panel (Modal Overlay with smooth backdrop) */}
       <AnimatePresence>
         {showKaramo && (
-          <motion.div initial={{ width: 0 }} animate={{ width: 380 }} exit={{ width: 0 }}
-            className="hidden lg:flex bg-white border-l border-slate-200 overflow-hidden shrink-0 flex-col relative z-20 h-full shadow-2xl">
-            <div className="flex-1 w-[380px] h-full flex flex-col">
-              <AITeacherChat inline onClose={() => setShowKaramo(false)} initialMessage={karamoPrompt} />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          <div className="fixed inset-0 z-[100] flex justify-end">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => setShowKaramo(false)}
+              className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs cursor-pointer"
+            />
 
-      {/* Karamö Assistant Drawer (Mobile) */}
-      <AnimatePresence>
-        {showKaramo && (
-          <motion.div
-            initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="lg:hidden absolute inset-0 z-[100] bg-white flex flex-col overflow-hidden rounded-2xl">
-            <AITeacherChat inline onClose={() => setShowKaramo(false)} initialMessage={karamoPrompt} />
-          </motion.div>
+            {/* Slide-Over Drawer */}
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 28, stiffness: 260 }}
+              className="relative w-full sm:w-[460px] md:w-[500px] h-full bg-white shadow-[-12px_0_40px_rgba(0,0,0,0.2)] flex flex-col z-[101] border-l border-slate-200"
+            >
+              <AITeacherChat
+                inline
+                contextTitle={currentChapter?.title}
+                onClose={() => setShowKaramo(false)}
+                initialMessage={karamoPrompt}
+              />
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </div>
