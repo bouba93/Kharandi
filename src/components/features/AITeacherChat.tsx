@@ -5,7 +5,6 @@ import {
   Loader2, 
   HelpCircle, 
   BookOpen, 
-  Sparkles, 
   History, 
   Plus, 
   Trash2, 
@@ -540,8 +539,8 @@ export const AITeacherChat: React.FC<AITeacherChatProps> = ({
             </div>
           </div>
           <div className="flex items-center gap-1 shrink-0">
-            <span className="text-[8.5px] font-black uppercase px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-md flex items-center gap-1 shadow-2xs">
-              <Sparkles size={9} className="text-emerald-600" /> Énoncé & Corrigé actifs
+            <span className="text-[8.5px] font-black uppercase px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-md flex items-center gap-1.5 shadow-2xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" /> Énoncé & Corrigé actifs
             </span>
           </div>
         </div>
