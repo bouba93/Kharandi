@@ -1644,13 +1644,12 @@ export const AdminDashboard: React.FC = () => {
                 <h3 className="text-xl font-black mb-1">Grille Tarifaire Officielle Kharandi</h3>
                 <p className="text-xs text-indigo-200/80 mb-4">Vue synthétique et officielle des prix facturés aux utilisateurs finaux de la plateforme.</p>
                 
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-2">
                   {[
                     { title: "A. École / Étudiant", price: "45 000 GNF / an", desc: "Cours, vidéos, QCM corrigés, Karamö AI, points" },
                     { title: "B. Forfait Répétiteur", price: "50 000 GNF / semestre", desc: "Publication d'annonces de cours particuliers + options" },
                     { title: "C. Forfait Vendeur", price: "50 000 GNF / semestre", desc: "Outils catalogue + visibilité facultative (+20k)" },
                     { title: "D. Forfait - Kharandi École", price: "60 000 GNF / élève / an", desc: "FULL PACKAGE (+ 40k GNF option bulletins, badges, parents)" },
-                    { title: "E. Formations", price: "100k / 300k GNF", desc: "Bureautique base & avancé + Certif KHARANDI" }
                   ].map((item, idx) => (
                     <div key={idx} className="bg-white/5 border border-white/10 rounded-xl p-3.5 text-xs flex flex-col justify-between hover:bg-white/10 transition-colors">
                       <div>

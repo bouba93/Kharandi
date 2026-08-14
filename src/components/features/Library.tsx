@@ -12,6 +12,10 @@ import { CoursePlayer } from './CoursePlayer';
 import { FALLBACK_BAC_SUBJECTS } from '../../data/fallbackSubjects';
 import { KharandiIcon, KharandiIconName } from '../icons/KharandiIcon';
 import { toast } from 'sonner';
+import { 
+  setActiveSubject, 
+  extractSubjectFromDocument 
+} from '../../services/subjectContext';
 
 // ─── Helpers for Subject Icons & Colors ─────────────────────────────────────
 const getSubjectIconName = (subject: string): KharandiIconName => {
@@ -179,26 +183,40 @@ export const Library: React.FC<{
     }
     const isLocked = item.locked ?? (item.is_free === false);
     if (!isLocked || isSubscribed) {
+      const subjectData = extractSubjectFromDocument(item);
+      if (subjectData) {
+        setActiveSubject(subjectData);
+      }
       setSelectedCourseId(item.id);
     } else {
       toast.error('Abonnement requis pour accéder à la version complète de ce sujet.');
     }
   };
 
-  const handleAskKaramo = (item: any, e: React.MouseEvent) => {
+  const handleAskKaramo = async (item: any, e: React.MouseEvent) => {
     e.stopPropagation();
     if (!onOpenKaramo) {
-      toast.info('Ouvrez le chat Karamö IA depuis le bouton en bas à droite !');
+      toast.info('Ouvrez le chat Karamo IA depuis le bouton en bas à droite !');
       return;
     }
-    const subject = item.subject?.name || item.subject || 'Général';
-    const context =
-      `📚 **Question sur l'épreuve : ${item.title}**\n` +
-      `• Niveau/Série : ${item.level || 'Examens'}\n` +
-      `• Matière : ${subject}\n` +
-      `• Année : ${item.year || 'Épreuve officielle'}\n\n` +
-      `*Aide-moi à comprendre et résoudre cet exercice étape par étape avec les formules clés.*`;
-    onOpenKaramo(context);
+
+    let fullItem = item;
+    if (!item.content && item.id) {
+      try {
+        const { getDocument } = await import('../../services/learning');
+        const doc = await getDocument(item.id);
+        if (doc) fullItem = { ...item, ...doc };
+      } catch (err) {
+        console.warn('Could not fetch full doc content:', err);
+      }
+    }
+
+    const subjectData = extractSubjectFromDocument(fullItem);
+    if (subjectData) {
+      setActiveSubject(subjectData);
+    }
+
+    onOpenKaramo("Peux-tu m'expliquer ce sujet pas à pas avec les formules clés et la méthode de résolution ?");
   };
 
   // Close autocomplete on click outside

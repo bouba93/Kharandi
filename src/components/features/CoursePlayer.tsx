@@ -15,11 +15,25 @@ import { SecurePDFViewer } from './SecurePDFViewer';
 import { useAuth } from '../../contexts/AuthContext';
 import { AITeacherChat } from './AITeacherChat';
 import { KaramoVoicePlayer } from './KaramoVoicePlayer';
+import { 
+  setActiveSubject, 
+  extractSubjectFromDocument, 
+  getActiveSubject 
+} from '../../services/subjectContext';
 
 interface Chapter {
-  id: string; title: string; content?: string; order: number;
-  videoUrl?: string; price?: number; isFree?: boolean;
+  id: string; 
+  title: string; 
+  content?: string; 
+  order: number;
+  videoUrl?: string; 
+  price?: number; 
+  isFree?: boolean;
   file_url?: string;
+  year?: string;
+  subject?: any;
+  level?: string;
+  description?: string;
   quiz?: { question: string; options: string[]; correctAnswer: number; };
 }
 
@@ -54,15 +68,25 @@ export const CoursePlayer: React.FC<{ courseId: string; onClose?: () => void }> 
             const doc = await getDocument(courseId);
             const d = (doc as any)?.data || doc;
             if (d && (d.content || d.file_url || d.external_url)) {
-              setChapters([{
-                id:       String(d.id),
-                title:    d.title || 'Sujet',
-                content:  d.content || '',
-                order:    1,
-                isFree:   d.is_free,
-                videoUrl: d.doc_type === 'VIDEO' ? (d.external_url || d.file_url) : undefined,
-                file_url: d.external_url || d.file_url || undefined,
-              }]);
+              const loadedChapters: Chapter[] = [{
+                id:          String(d.id),
+                title:       d.title || 'Sujet',
+                content:     d.content || '',
+                order:       1,
+                isFree:      d.is_free,
+                videoUrl:    d.doc_type === 'VIDEO' ? (d.external_url || d.file_url) : undefined,
+                file_url:    d.external_url || d.file_url || undefined,
+                year:        d.year,
+                subject:     d.subject,
+                level:       d.level,
+                description: d.description,
+              }];
+              setChapters(loadedChapters);
+              
+              // Persister le sujet complet pour Karamo
+              const subData = extractSubjectFromDocument(d);
+              if (subData) setActiveSubject(subData);
+              
               setLoading(false);
               return;
             }
@@ -94,26 +118,40 @@ export const CoursePlayer: React.FC<{ courseId: string; onClose?: () => void }> 
           const matchedDoc = list.find((d: any) => String(d.id) === String(courseId));
           if (matchedDoc) {
             docs = [{
-              id:       String(matchedDoc.id),
-              title:    matchedDoc.title,
-              content:  matchedDoc.content || '',
-              order:    1,
-              isFree:   matchedDoc.is_free,
-              videoUrl: matchedDoc.doc_type === 'VIDEO' ? (matchedDoc.external_url || matchedDoc.file_url) : undefined,
-              file_url: matchedDoc.external_url || matchedDoc.file_url || undefined,
+              id:          String(matchedDoc.id),
+              title:       matchedDoc.title,
+              content:     matchedDoc.content || '',
+              order:       1,
+              isFree:      matchedDoc.is_free,
+              videoUrl:    matchedDoc.doc_type === 'VIDEO' ? (matchedDoc.external_url || matchedDoc.file_url) : undefined,
+              file_url:    matchedDoc.external_url || matchedDoc.file_url || undefined,
+              year:        matchedDoc.year,
+              subject:     matchedDoc.subject,
+              level:       matchedDoc.level,
+              description: matchedDoc.description,
             }];
             setCurrentChapterIndex(0);
+            const subData = extractSubjectFromDocument(matchedDoc);
+            if (subData) setActiveSubject(subData);
           }
         } else {
           docs = list.map((d: any, i: number) => ({
-            id:       String(d.id),
-            title:    d.title,
-            content:  d.content || '',
-            order:    i + 1,
-            isFree:   d.is_free,
-            videoUrl: d.doc_type === 'VIDEO' ? (d.external_url || d.file_url) : undefined,
-            file_url: d.external_url || d.file_url || undefined,
+            id:          String(d.id),
+            title:       d.title,
+            content:     d.content || '',
+            order:       i + 1,
+            isFree:      d.is_free,
+            videoUrl:    d.doc_type === 'VIDEO' ? (d.external_url || d.file_url) : undefined,
+            file_url:    d.external_url || d.file_url || undefined,
+            year:        d.year,
+            subject:     d.subject,
+            level:       d.level,
+            description: d.description,
           }));
+          if (docs.length > 0) {
+            const subData = extractSubjectFromDocument(list[0]);
+            if (subData) setActiveSubject(subData);
+          }
         }
 
         setChapters(docs);
@@ -150,6 +188,14 @@ export const CoursePlayer: React.FC<{ courseId: string; onClose?: () => void }> 
     : 0;
   const currentChapter = chapters[currentChapterIndex];
 
+  // Synchroniser le sujet actif avec le chapitre courant
+  useEffect(() => {
+    if (currentChapter) {
+      const subData = extractSubjectFromDocument(currentChapter);
+      if (subData) setActiveSubject(subData);
+    }
+  }, [currentChapterIndex, chapters]);
+
   // Helper to detect if content has a worked solution section
   const hasWorkedSolution = currentChapter?.content?.toLowerCase().includes('corrigé') || 
                             currentChapter?.content?.toLowerCase().includes('solution') ||
@@ -157,17 +203,17 @@ export const CoursePlayer: React.FC<{ courseId: string; onClose?: () => void }> 
 
   // Helper to open Karamo with full rich context of the current subject
   const triggerKaramo = (mode: 'explain' | 'quiz') => {
-    const title = currentChapter?.title || 'Sujet d\'examen';
-    const excerpt = currentChapter?.content ? currentChapter.content.slice(0, 800) : '';
+    const ch = chapters[currentChapterIndex];
+    const subData = extractSubjectFromDocument(ch);
+    if (subData) {
+      setActiveSubject(subData);
+    }
     
     let prompt = '';
     if (mode === 'explain') {
-      prompt = `Tu es Professeur Karamo, enseignant virtuel de référence pour le programme éducatif guinéen.\n` +
-        `Peux-tu m'expliquer étape par étape la méthode de résolution de ce sujet : "${title}" ?\n\n` +
-        (excerpt ? `Extrait de l'énoncé :\n"""\n${excerpt}\n"""\n\n` : '') +
-        `Sois très clair, donne les formules clés à retenir et les étapes ordonnées.`;
+      prompt = `Peux-tu m'expliquer ce sujet pas à pas avec les formules clés et la méthode de résolution ?`;
     } else {
-      prompt = `Tu es Professeur Karamo. Pose-moi 3 questions d'entraînement ou QCM basées sur les notions clés du sujet "${title}" pour tester ma compréhension.`;
+      prompt = `Pose-moi 3 questions d'entraînement ou QCM basées sur les notions clés de ce sujet pour tester ma compréhension.`;
     }
 
     setKaramoPrompt(`${prompt} ###${Date.now()}`);
@@ -620,6 +666,7 @@ export const CoursePlayer: React.FC<{ courseId: string; onClose?: () => void }> 
               <AITeacherChat
                 inline
                 contextTitle={currentChapter?.title}
+                activeSubject={extractSubjectFromDocument(currentChapter) || undefined}
                 onClose={() => setShowKaramo(false)}
                 initialMessage={karamoPrompt}
               />
