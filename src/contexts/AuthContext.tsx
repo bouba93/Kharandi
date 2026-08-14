@@ -28,9 +28,6 @@ const AuthContext = createContext<AuthContextType>({
   refreshProfile: async () => {},
 });
 
-const ADMIN_PHONE = '+224627382173';
-const VIP_PHONES  = ['+224621034412', '621034412', '+224626187117', '626187117'];
-
 const mapProfile = (data: any): UserProfile => {
   if (!data) return {
     uid: 'unknown', email: '', role: 'student', name: 'Utilisateur',
@@ -46,32 +43,26 @@ const mapProfile = (data: any): UserProfile => {
 
   const phone = d.phone || d.username || '';
 
-  // Numéro admin → role admin
-  if (phone === ADMIN_PHONE || phone.includes('627382173')) rawRole = 'admin';
-
-  const isAdmin = rawRole === 'admin';
-  const isVip   = VIP_PHONES.includes(phone); // Élève VIP : accès complet, role student
-
   return {
     uid:   d.id  || d.uid   || 'unknown',
     email: d.email || phone || '',
     phone,
-    role:  isVip ? 'student' : rawRole,  // VIP = élève, pas admin
+    role:  rawRole,
     name:  p.first_name
       ? `${p.first_name} ${p.last_name || ''}`.trim()
       : (phone || 'Utilisateur'),
     interests:           p.interests || [],
-    onboardingCompleted: (isVip || isAdmin) ? true : (
+    onboardingCompleted: (
       p.onboarding_completed === true || d.onboarding_completed === true ||
       p.onboarding_completed === 'true' || d.onboarding_completed === 'true' ||
       p.onboarding_completed === 'True' || d.onboarding_completed === 'True' ||
       p.onboarding_completed === 1 || d.onboarding_completed === 1 ||
       p.onboarding_completed === '1' || d.onboarding_completed === '1'
     ),
-    isApproved:       (isVip || isAdmin) ? true : (d.is_active ?? true),
+    isApproved:       d.is_active ?? true,
     points:           p.points || 0,
-    subscriptionPlan: (isVip || isAdmin) ? 'annuel' : (d.subscription_plan || 'free'),
-    activeAddons:     (isVip || isAdmin) ? ['all'] : (d.active_addons || []),
+    subscriptionPlan: d.subscription_plan || 'free',
+    activeAddons:     d.active_addons || [],
     city:             p.city || d.city || '',
     shopName:         p.shop_name || d.shop_name || '',
     shopDescription:  p.shop_description || d.shop_description || '',
