@@ -118,14 +118,14 @@ export const Subscription: React.FC = () => {
     // Try to find the real Student / Annual plan in the database list
     const matchedPlan = plans.find(p => {
       const name = (p.name || '').toLowerCase();
-      const hasStudentKeywords = name.includes('élève') || name.includes('eleve') || name.includes('etudiant') || name.includes('étudiant');
-      return hasStudentKeywords && p.price === 45000;
+      const hasStudentKeywords = name.includes('élève') || name.includes('eleve') || name.includes('etudiant') || name.includes('étudiant') || name.includes('student');
+      return hasStudentKeywords || p.price === 45000 || p.id === 'student' || p.id === 'eleve';
     });
     
     if (matchedPlan) {
       handleSubscribe(matchedPlan.id, matchedPlan.price);
     } else {
-      handleDirectPayment(45000, "Abonnement Élève / Étudiant — Kharandi");
+      handleSubscribe('student', 45000);
     }
   };
 
@@ -135,7 +135,12 @@ export const Subscription: React.FC = () => {
     if (tutorOptionHighlight) {
       price += 20000; // + 20 000 GNF/mois highlight
     }
-    handleDirectPayment(price, `Forfait Répétiteur (${tutorPeriod === 'ANNUAL_1' ? 'Année 1' : 'Année 2+'})`);
+    const matchedPlan = plans.find(p => p.id === 'tutor' || p.id === 'repetiteur' || (p.name || '').toLowerCase().includes('répétiteur') || (p.name || '').toLowerCase().includes('tuteur'));
+    if (matchedPlan) {
+      handleSubscribe(matchedPlan.id, price);
+    } else {
+      handleSubscribe('tutor', price);
+    }
   };
 
   // Helper to purchase Seller Plan with active choices
@@ -143,7 +148,12 @@ export const Subscription: React.FC = () => {
     let price = 50000; // Base is 50 000 GNF
     if (sellerOptionHighlight) price += 20000;
     if (sellerOptionBoost) price += 15000;
-    handleDirectPayment(price, "Forfait Vendeur & Boutique");
+    const matchedPlan = plans.find(p => p.id === 'seller' || p.id === 'vendeur' || (p.name || '').toLowerCase().includes('vendeur') || (p.name || '').toLowerCase().includes('boutique'));
+    if (matchedPlan) {
+      handleSubscribe(matchedPlan.id, price);
+    } else {
+      handleSubscribe('seller', price);
+    }
   };
 
   if (fetchingData) {
@@ -339,7 +349,7 @@ export const Subscription: React.FC = () => {
 
               <div className="space-y-4">
                 <button
-                  onClick={() => handleDirectPayment(250000, "Abonnement Pass Palmarès National — 250 000 GNF/an")}
+                  onClick={() => handleSubscribe('palmares', 250000)}
                   disabled={loading}
                   className="w-full py-4 text-sm font-black text-white bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 rounded-2xl shadow-lg shadow-amber-500/20 transform hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >

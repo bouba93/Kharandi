@@ -50,8 +50,8 @@ export const SchoolRankings: React.FC = () => {
   const handleSubscribePalmares = async () => {
     setPaying(true);
     try {
-      const { initiatePayment } = await import('../../services/payments');
-      const res = await initiatePayment({ amount: 250000, currency: 'GNF' });
+      const { initiateSubscription } = await import('../../services/payments');
+      const res = await initiateSubscription('palmares', 'GNF');
       if (res?.payment_url) {
         window.location.href = res.payment_url;
       } else {
@@ -60,9 +60,8 @@ export const SchoolRankings: React.FC = () => {
         toast.success("Pass Palmarès activé avec succès (250 000 GNF/an) !");
       }
     } catch (err: any) {
-      localStorage.setItem('kharandi_palmares_unlocked', 'true');
-      setUnlocked(true);
-      toast.success("Pass Palmarès activé (250 000 GNF/an) !");
+      console.error("Erreur initiation abonnement palmares:", err);
+      toast.error(err.response?.data?.message || "Erreur lors de l'activation du Pass Palmarès.");
     } finally {
       setPaying(false);
     }
