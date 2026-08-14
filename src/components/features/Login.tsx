@@ -1,29 +1,80 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '../ui/Button';
-import { Phone, Lock, Eye, EyeOff, AlertCircle, Loader2, Backpack, Pencil, PenTool, Ruler, GraduationCap, BookOpen, CheckCircle2, ArrowLeft, MessageCircle, Mail, ExternalLink, Sparkles, ShieldCheck } from 'lucide-react';
+import { Phone, Lock, Eye, EyeOff, AlertCircle, Loader2, Backpack, Pencil, PenTool, Ruler, GraduationCap, BookOpen, CheckCircle2, ArrowLeft, MessageCircle, Mail, ExternalLink, Sparkles, Users, Store, UserCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '../../config/api';
 import { useAuth } from '../../contexts/AuthContext';
+import { updateProfile } from '../../services/auth';
 
 const ADMIN_PHONE = '+224627382173';
 
-type Step = 'phone' | 'otp' | 'password' | 'new_password' | 'reset_otp' | 'reset_new';
+type Step = 'phone' | 'otp' | 'password' | 'role' | 'new_password' | 'reset_otp' | 'reset_new';
 type Mode = 'login' | 'register';
+
+interface RoleOption {
+  id: string;
+  backendRole: string;
+  label: string;
+  badge: string;
+  desc: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  accentColor: string;
+}
+
+const REGISTER_ROLES: RoleOption[] = [
+  {
+    id: 'student',
+    backendRole: 'STUDENT',
+    label: 'Élève / Étudiant',
+    badge: 'Apprentissage & Examens',
+    desc: 'Révisions de cours, annales officielles du Bac/BEPC/CEE, calcul mental et Exo Gagnant.',
+    icon: GraduationCap,
+    accentColor: '#18bfd6',
+  },
+  {
+    id: 'parent',
+    backendRole: 'PARENT',
+    label: 'Parent d\'élève',
+    badge: 'Suivi Scolaire',
+    desc: 'Suivez la progression, consultez les bulletins et accompagnez la réussite de vos enfants.',
+    icon: Users,
+    accentColor: '#fcb303',
+  },
+  {
+    id: 'repetiteur',
+    backendRole: 'TUTOR',
+    label: 'Répétiteur / Enseignant',
+    badge: 'Soutien & Cours',
+    desc: 'Proposez vos cours particuliers, fixez vos matières et recevez des demandes de parents.',
+    icon: UserCheck,
+    accentColor: '#10b981',
+  },
+  {
+    id: 'seller',
+    backendRole: 'SELLER',
+    label: 'Vendeur / Librairie',
+    badge: 'Kharandi Makiti',
+    desc: 'Vendez vos manuels scolaires, cahiers, calculatrices et fournitures aux élèves.',
+    icon: Store,
+    accentColor: '#8b5cf6',
+  },
+];
 
 export const Login: React.FC = () => {
   const { setGuestMode } = useAuth();
-  const [mode,        setMode]        = useState<Mode>('login');
-  const [step,        setStep]        = useState<Step>('phone');
-  const [phone,       setPhone]       = useState('');
-  const [otpCode,     setOtpCode]     = useState('');
-  const [password,    setPassword]    = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [showPwd,     setShowPwd]     = useState(false);
-  const [loading,     setLoading]     = useState(false);
-  const [error,       setError]       = useState<string|null>(null);
-  const [bannerIdx,   setBannerIdx]   = useState(0);
-  const [hasAccount,  setHasAccount]  = useState<boolean|null>(null);
+  const [mode,          setMode]          = useState<Mode>('login');
+  const [step,          setStep]          = useState<Step>('phone');
+  const [phone,         setPhone]         = useState('');
+  const [otpCode,       setOtpCode]       = useState('');
+  const [selectedRole,  setSelectedRole]  = useState<string>('student');
+  const [password,      setPassword]      = useState('');
+  const [newPassword,   setNewPassword]   = useState('');
+  const [showPwd,       setShowPwd]       = useState(false);
+  const [loading,       setLoading]       = useState(false);
+  const [error,         setError]         = useState<string|null>(null);
+  const [bannerIdx,     setBannerIdx]     = useState(0);
+  const [hasAccount,    setHasAccount]    = useState<boolean|null>(null);
 
   const banners = [
     "https://lh3.googleusercontent.com/d/1IUjSHliHKUAS9Thn4jtRV_pUwgARgkz3",
@@ -119,29 +170,46 @@ export const Login: React.FC = () => {
         const { data } = await api.post('/auth/login/verify/', { phone: p, code: otpCode });
         _save(data); toast.success('Connexion réussie !'); _go();
       } else {
-        // Inscription → aller vers création mot de passe
-        setStep('new_password');
+        // Inscription → passer à la sélection du rôle
+        setStep('role');
       }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Code incorrect ou expiré.');
     } finally { setLoading(false); }
   };
 
-  // ── Inscription : créer le mot de passe ───────────────────────────────────
+  // ── Inscription : créer le mot de passe & finaliser ────────────────────────
   const handleNewPassword = async () => {
     if (newPassword.length < 6) {
-      setError("Minimum 6 caractères."); return;
+      setError("Minimum 6 caractères pour votre mot de passe."); return;
     }
     setLoading(true); setError(null);
     try {
+      const selectedRoleObj = REGISTER_ROLES.find(r => r.id === selectedRole) || REGISTER_ROLES[0];
       const { data } = await api.post('/auth/register/', {
-        phone: fmt(), code: otpCode, password: newPassword,
+        phone: fmt(),
+        code: otpCode,
+        password: newPassword,
+        role: selectedRoleObj.backendRole,
       });
       _save(data);
+
+      // Enregistrer les métadonnées d'onboarding
+      sessionStorage.setItem('just_registered', 'true');
+      localStorage.setItem('just_registered', 'true');
+      sessionStorage.setItem('onboarding_role', selectedRole);
+      sessionStorage.setItem('onboarding_step', '1'); // Aller directement aux informations de profil
+
+      try {
+        await updateProfile({
+          role: selectedRoleObj.backendRole,
+        });
+      } catch {}
+
       toast.success('Compte créé ! Bienvenue sur Kharandi 🎉');
       _go();
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Erreur. Réessayez.');
+      setError(err.response?.data?.message || 'Erreur lors de la création du compte. Réessayez.');
     } finally { setLoading(false); }
   };
 
@@ -173,17 +241,19 @@ export const Login: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (step === 'phone')        handlePhone();
-    else if (step === 'password')    handlePassword();
-    else if (step === 'otp')         handleOTP();
-    else if (step === 'new_password')handleNewPassword();
-    else if (step === 'reset_otp')   step === 'reset_otp' && otpCode ? setStep('reset_new') : null;
-    else if (step === 'reset_new')   handleResetConfirm();
+    if (step === 'phone')         handlePhone();
+    else if (step === 'password')     handlePassword();
+    else if (step === 'otp')          handleOTP();
+    else if (step === 'role')         setStep('new_password');
+    else if (step === 'new_password') handleNewPassword();
+    else if (step === 'reset_otp')    step === 'reset_otp' && otpCode ? setStep('reset_new') : null;
+    else if (step === 'reset_new')    handleResetConfirm();
   };
 
   const reset = (m: Mode) => {
     setMode(m); setStep('phone'); setError(null);
     setOtpCode(''); setPassword(''); setNewPassword('');
+    setSelectedRole('student');
     setHasAccount(null);
   };
 
@@ -200,16 +270,18 @@ export const Login: React.FC = () => {
     phone:        mode === 'login' ? 'Ravi de vous revoir !' : 'Créer votre compte',
     password:     'Entrez votre mot de passe',
     otp:          mode === 'login' ? 'Vérification' : 'Confirmez votre numéro',
-    new_password: 'Choisissez un mot de passe',
+    role:         'Choisissez votre rôle',
+    new_password: 'Créez votre mot de passe',
     reset_otp:    'Code de réinitialisation',
     reset_new:    'Nouveau mot de passe',
   };
 
   const stepSub: Record<Step, string> = {
-    phone:        mode === 'login' ? 'Entrez votre numéro' : 'Quelques secondes suffisent',
+    phone:        mode === 'login' ? 'Entrez votre numéro de téléphone' : 'Rejoignez la communauté éducative Kharandi',
     password:     fmt(),
-    otp:          `Code envoyé au ${fmt()}`,
-    new_password: 'Il sera sauvegardé sur cet appareil',
+    otp:          `Code SMS envoyé au ${fmt()}`,
+    role:         'Sélectionnez votre type de profil pour une expérience sur mesure',
+    new_password: 'Ce mot de passe sécurisera votre compte sur cet appareil',
     reset_otp:    `Code envoyé au ${fmt()}`,
     reset_new:    'Choisissez un nouveau mot de passe sécurisé',
   };
@@ -486,12 +558,95 @@ export const Login: React.FC = () => {
               </motion.div>
             )}
 
+            {/* Step : Role Selection (Inscription) */}
+            {step === 'role' && (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3 text-left">
+                <div className="grid grid-cols-1 gap-2.5 max-h-[340px] overflow-y-auto pr-1">
+                  {REGISTER_ROLES.map((r) => {
+                    const Icon = r.icon;
+                    const isSelected = selectedRole === r.id;
+                    return (
+                      <button
+                        key={r.id}
+                        type="button"
+                        onClick={() => setSelectedRole(r.id)}
+                        className={`w-full p-3.5 rounded-2xl border-2 transition-all flex items-start gap-3 cursor-pointer text-left ${
+                          isSelected
+                            ? 'border-[#18bfd6] bg-[#18bfd6]/5 shadow-sm'
+                            : 'border-slate-100 bg-slate-50/70 hover:border-slate-200 hover:bg-white'
+                        }`}
+                      >
+                        <div
+                          className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 font-bold transition-colors ${
+                            isSelected ? 'bg-[#18bfd6] text-white' : 'bg-white text-slate-600 border border-slate-200/80'
+                          }`}
+                        >
+                          <Icon size={20} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-1 mb-0.5">
+                            <span className="text-xs font-black text-slate-900 truncate">{r.label}</span>
+                            <span
+                              className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                                isSelected ? 'bg-[#18bfd6]/20 text-[#18bfd6]' : 'bg-slate-200/60 text-slate-600'
+                              }`}
+                            >
+                              {r.badge}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-500 font-medium leading-relaxed line-clamp-2">
+                            {r.desc}
+                          </p>
+                        </div>
+                        {isSelected && (
+                          <div className="shrink-0 text-[#18bfd6] self-center">
+                            <CheckCircle2 size={18} />
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="flex justify-between items-center px-1 pt-1">
+                  <button 
+                    type="button" 
+                    onClick={() => { setStep('phone'); }}
+                    className="text-[10px] font-black uppercase text-slate-400 hover:text-[#18bfd6] transition-colors cursor-pointer"
+                  >
+                    ← Modifier le numéro
+                  </button>
+                  <span className="text-[10px] font-bold text-slate-400">
+                    Étape 2 sur 3
+                  </span>
+                </div>
+              </motion.div>
+            )}
+
             {/* Step : New Password / Reset Confirm */}
             {(step === 'new_password' || step === 'reset_new') && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
+                {step === 'new_password' && mode === 'register' && (
+                  <div className="flex items-center justify-between bg-slate-50 border border-slate-200/80 px-3.5 py-2 rounded-2xl">
+                    <div className="flex items-center gap-2 text-left">
+                      <span className="text-xs font-bold text-slate-500">Rôle :</span>
+                      <span className="text-xs font-black text-slate-800">
+                        {REGISTER_ROLES.find(r => r.id === selectedRole)?.label || 'Élève / Étudiant'}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setStep('role')}
+                      className="text-[10px] font-black text-[#18bfd6] uppercase hover:underline cursor-pointer"
+                    >
+                      Changer
+                    </button>
+                  </div>
+                )}
+                
                 <div className="bg-[#18bfd6]/5 border border-[#18bfd6]/10 rounded-2xl p-4 text-left">
                   <p className="text-xs text-slate-600 font-medium leading-relaxed">
-                    🔒 <strong>Sécurité locale :</strong> Ce mot de passe sera mémorisé sur votre appareil pour vous éviter de futurs codes SMS.
+                    🔒 <strong>Sécurité du compte :</strong> Choisissez un mot de passe d'au moins 6 caractères pour vous connecter rapidement.
                   </p>
                 </div>
                 <div className="relative">
@@ -525,6 +680,18 @@ export const Login: React.FC = () => {
                     />
                   ))}
                 </div>
+
+                {step === 'new_password' && mode === 'register' && (
+                  <div className="flex justify-start px-1">
+                    <button 
+                      type="button" 
+                      onClick={() => setStep('role')}
+                      className="text-[10px] font-black uppercase text-slate-400 hover:text-[#18bfd6] transition-colors cursor-pointer"
+                    >
+                      ← Retour au choix du rôle
+                    </button>
+                  </div>
+                )}
               </motion.div>
             )}
 
@@ -540,7 +707,8 @@ export const Login: React.FC = () => {
                 step === 'phone'        ? 'Continuer' :
                 step === 'password'     ? 'Se connecter' :
                 step === 'otp'          ? (mode === 'login' ? 'Confirmer' : 'Suivant') :
-                step === 'new_password' ? 'Créer mon compte' :
+                step === 'role'         ? 'Valider mon profil & Continuer' :
+                step === 'new_password' ? 'Créer mon compte & Commencer' :
                 step === 'reset_otp'    ? 'Suivant' :
                 'Mettre à jour mon mot de passe'
               )}

@@ -70,7 +70,10 @@ export const Onboarding: React.FC<{ onComplete: () => Promise<void> }> = ({ onCo
   // 3: Success "Welcome to Kharandi" screen
   const [step, setStep] = useState(() => {
     const saved = sessionStorage.getItem('onboarding_step');
-    return saved ? parseInt(saved, 10) : 0;
+    if (saved) return parseInt(saved, 10);
+    const hasRole = sessionStorage.getItem('onboarding_role');
+    if (hasRole) return 1;
+    return 0;
   });
 
   const updateStep = (newStep: number) => {
@@ -79,7 +82,7 @@ export const Onboarding: React.FC<{ onComplete: () => Promise<void> }> = ({ onCo
   };
   
   const [role, setRole] = useState<string | null>(() => {
-    return sessionStorage.getItem('onboarding_role') || (userProfile?.role !== 'student' ? userProfile?.role : null) || null;
+    return sessionStorage.getItem('onboarding_role') || (userProfile?.role && userProfile.role !== 'unknown' ? userProfile.role : 'student');
   });
   
   // Profil States
@@ -284,6 +287,7 @@ export const Onboarding: React.FC<{ onComplete: () => Promise<void> }> = ({ onCo
       toast.success("Profil configuré avec succès !");
       
       sessionStorage.clear();
+      localStorage.removeItem('just_registered');
       
       // Wait a bit to ensure backend consistency before parent reload
       await new Promise(resolve => setTimeout(resolve, 800));

@@ -62,11 +62,15 @@ function AppRoutes() {
   const isAuthenticated = !!userProfile || isGuest;
   const isAdmin = userProfile?.role?.toLowerCase() === 'admin';
 
-  const isNewlyRegistered = sessionStorage.getItem('just_registered') === 'true';
+  const isNewlyRegistered = sessionStorage.getItem('just_registered') === 'true' || localStorage.getItem('just_registered') === 'true';
+  const needsOnboarding = isAuthenticated && !isGuest && userProfile && !isAdmin && (
+    !userProfile.onboardingCompleted || isNewlyRegistered
+  );
 
-  if (isAuthenticated && !isGuest && userProfile && isNewlyRegistered && !justFinishedOnboarding) {
+  if (needsOnboarding && !justFinishedOnboarding) {
     return <Onboarding onComplete={async () => {
       sessionStorage.removeItem('just_registered');
+      localStorage.removeItem('just_registered');
       setJustFinishedOnboarding(true);
       await refreshProfile();
     }} />;
