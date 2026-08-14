@@ -65,7 +65,7 @@ export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname;
-  const { userProfile, isGuest, isDemoMode, setGuestMode, setDemoMode, logout } = useAuth();
+  const { userProfile, isGuest, setGuestMode, logout } = useAuth();
   const role = userProfile?.role || 'student';
   const subscriptionPlan = userProfile?.subscriptionPlan || 'free';
 
@@ -260,7 +260,7 @@ export const Dashboard: React.FC = () => {
     { id: 'Sujets et traités', icon: BookOpen, kIcon: 'cours' as KharandiIconName, roles: ['student', 'eleve', 'parent', 'admin', 'teacher', 'repetiteur'] },
     { id: 'Calcul mental', icon: Brain, kIcon: 'abacus' as KharandiIconName, roles: ['student', 'eleve', 'parent', 'admin', 'teacher', 'repetiteur'] },
     { id: 'Exo Gagnant', icon: PenTool, kIcon: 'exercices' as KharandiIconName, roles: ['student', 'eleve', 'admin'] },
-    { id: 'Mon Wallet', icon: WalletIcon, kIcon: 'portefeuille' as KharandiIconName, roles: ['student', 'eleve', 'parent', 'admin', 'teacher', 'repetiteur', 'seller', 'ecole'] },
+    { id: 'Mon Wallet', icon: WalletIcon, kIcon: 'portefeuille' as KharandiIconName, roles: ['student', 'eleve', 'parent', 'admin', 'teacher', 'repetiteur', 'seller'] },
     { id: 'Répétiteurs', icon: Users, kIcon: 'enseignant' as KharandiIconName, premium: true, roles: ['student', 'eleve', 'parent', 'admin'] },
     { id: 'Résultats', icon: Award, kIcon: 'examen' as KharandiIconName, roles: ['student', 'eleve', 'parent', 'admin'] },
     { id: 'Bourses', icon: Briefcase, kIcon: 'bourse' as KharandiIconName, roles: ['student', 'eleve', 'parent', 'admin'] },
@@ -337,16 +337,6 @@ export const Dashboard: React.FC = () => {
         </div>
         
         <div className="px-6 py-4 border-b border-gray-50 mb-2">
-          {isDemoMode && (
-            <div className="mb-2 flex items-center justify-between bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-xl">
-              <span className="text-[10px] font-black uppercase text-amber-600 tracking-wider flex items-center gap-1">
-                <ShieldCheck size={11} /> Compte Démo
-              </span>
-              <span className="text-[9px] font-extrabold bg-amber-500 text-white px-1.5 py-0.2 rounded-md">
-                Accès Total
-              </span>
-            </div>
-          )}
           <p className="font-extrabold text-text-main truncate">
             {isGuest ? 'Mode Invité' : (userProfile?.name && userProfile.name !== 'Utilisateur' 
               ? userProfile.name 

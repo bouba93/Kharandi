@@ -830,14 +830,6 @@ export const AdminDashboard: React.FC = () => {
   const [smsMessage,     setSmsMessage]      = useState('');
   const [refreshing,     setRefreshing]      = useState(false);
 
-  // Kharandi École Management State
-  const [schools, setSchools] = useState<any[]>([]);
-  const [loadingSchools, setLoadingSchools] = useState(false);
-  const [newSchoolName, setNewSchoolName] = useState('');
-  const [newSchoolEmail, setNewSchoolEmail] = useState('');
-  const [newSchoolCode, setNewSchoolCode] = useState('');
-  const [isAddingSchool, setIsAddingSchool] = useState(false);
-
   // Actualités state
   const [newsItems, setNewsItems] = useState<any[]>([]);
   const [newsForm, setNewsForm] = useState({ title: '', excerpt: '', category: 'Infos', color: 'bg-blue-100 text-blue-600' });
@@ -857,18 +849,6 @@ export const AdminDashboard: React.FC = () => {
   const [palmaresItems, setPalmaresItems] = useState<any[]>([]);
   const [palmaresForm, setPalmaresForm] = useState({ rank: '', name: '', location: '', school_type: 'Privé', score: '' });
   const [isAddingPalmares, setIsAddingPalmares] = useState(false);
-
-  const fetchSchools = async () => {
-    setLoadingSchools(true);
-    try {
-      const { data } = await api.get('/content/school-rankings/');
-      setSchools(data?.data || []);
-    } catch (err) {
-      console.error("fetchSchools error:", err);
-    } finally {
-      setLoadingSchools(false);
-    }
-  };
 
   const fetchNewsList = async () => {
     try {
@@ -911,9 +891,7 @@ export const AdminDashboard: React.FC = () => {
   };
 
   useEffect(() => {
-    if (activeTab === 'ecole_manager') {
-      fetchSchools();
-    } else if (activeTab === 'admin_news') {
+    if (activeTab === 'admin_news') {
       fetchNewsList();
     } else if (activeTab === 'admin_scholarships') {
       fetchScholarshipList();
@@ -923,47 +901,6 @@ export const AdminDashboard: React.FC = () => {
       fetchPalmaresList();
     }
   }, [activeTab]);
-
-  const generateRandomSchoolCode = () => {
-    const code = `SCH-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
-    setNewSchoolCode(code);
-  };
-
-  const handleCreateSchool = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newSchoolName.trim() || !newSchoolEmail.trim() || !newSchoolCode.trim()) {
-      toast.error("Vreuillez renseigner tous les champs.");
-      return;
-    }
-
-    try {
-      // École créée via Django — endpoint à implémenter si nécessaire
-      toast.info("Fonctionnalité école en cours d'intégration.");
-      setNewSchoolName(''); setNewSchoolEmail(''); setNewSchoolCode('');
-      setIsAddingSchool(false);
-    } catch (err: any) {
-      toast.error("Erreur de création.");
-    }
-  };
-
-  const handleToggleSchoolSubscription = async (schoolId: string, currentStatus: string) => {
-    try {
-      toast.info("Mise à jour statut école — fonctionnalité en cours d'intégration.");
-      await fetchSchools();
-    } catch (err) {
-      toast.error("Erreur de mise à jour.");
-    }
-  };
-
-  const handleDeleteSchool = async (schoolId: string) => {
-    if (!confirm("Voulez-vous supprimer définitivement cet établissement scolaire de la plate-forme ?")) return;
-    try {
-      toast.info("Suppression école — fonctionnalité en cours d'intégration.");
-      await fetchSchools();
-    } catch (err) {
-      toast.error("Erreur de suppression.");
-    }
-  };
 
   const handleCreateNews = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1181,7 +1118,6 @@ export const AdminDashboard: React.FC = () => {
   const tabs = [
     { id: 'overview',   icon: LayoutDashboard, label: 'Vue d\'ensemble' },
     { id: 'users',      icon: Users,            label: 'Utilisateurs',   badge: users.length },
-    { id: 'ecole_manager', icon: School,        label: 'Kharandi École', badge: schools.length || undefined },
     { id: 'documents',  icon: BookOpen,         label: 'Documents',      badge: documents.length },
     { id: 'payments',   icon: CreditCard,       label: 'Paiements',      badge: transactions.filter(t=>t.status==='PENDING').length || undefined },
     { id: 'tickets',    icon: MessageSquare,    label: 'Support',        badge: stats.open_tickets || undefined },
@@ -1884,209 +1820,6 @@ export const AdminDashboard: React.FC = () => {
                   <p className="text-sm font-bold text-amber-800">Attention</p>
                   <p className="text-xs text-amber-700 mt-1">Chaque SMS envoyé en masse consomme du crédit Nimba SMS. Vérifiez votre solde avant l'envoi groupé.</p>
                 </div>
-              </div>
-            </div>
-          )}
-
-          {/* ── KHARANDI ÉCOLE PARTNERS MANAGER ─────────────────────── */}
-          {activeTab === 'ecole_manager' && (
-            <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                  <h2 className="text-2xl font-black text-slate-900">Administration Kharandi École</h2>
-                  <p className="text-sm text-slate-400">Gérez le déploiement des licences d'établissement, l'accès des directions et les abonnements actifs.</p>
-                </div>
-                <button 
-                  onClick={() => {
-                    setIsAddingSchool(!isAddingSchool);
-                    generateRandomSchoolCode();
-                  }}
-                  className="flex items-center gap-2 bg-primary text-white px-5 py-3 rounded-2xl text-sm font-extrabold shadow-md shadow-primary/10"
-                >
-                  <Plus size={16} /> Enregistrer une École
-                </button>
-              </div>
-
-              {/* Stats overview of schools */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm">
-                  <p className="text-2xl font-black text-slate-900">{schools.length}</p>
-                  <p className="text-xs text-slate-400 font-bold mt-1">Écoles Partenaires</p>
-                </div>
-                <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm">
-                  <p className="text-2xl font-black text-green-600">{schools.filter(s => s.isActivated).length}</p>
-                  <p className="text-xs text-slate-400 font-bold mt-1">Espaces Activés</p>
-                </div>
-                <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm">
-                  <p className="text-2xl font-black text-amber-500">{schools.filter(s => !s.isActivated).length}</p>
-                  <p className="text-xs text-slate-400 font-bold mt-1">En attente d'activation</p>
-                </div>
-                <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm">
-                  <p className="text-2xl font-black text-primary">{schools.filter(s => s.status === 'active').length}</p>
-                  <p className="text-xs text-slate-400 font-bold mt-1">Abonnements Actifs</p>
-                </div>
-              </div>
-
-              {/* Add School Account Form */}
-              {isAddingSchool && (
-                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-                  <h3 className="font-black text-slate-900 mb-4">Créer un Portail d'Établissement</h3>
-                  <form onSubmit={handleCreateSchool} className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <label className="text-xs font-bold text-slate-650 block mb-1">Nom de l'école / Établissement</label>
-                        <input 
-                          type="text" 
-                          required
-                          value={newSchoolName}
-                          onChange={(e) => setNewSchoolName(e.target.value)}
-                          placeholder="Ex: Complexe Scolaire Saint-Joseph" 
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs font-bold text-slate-650 block mb-1">Email officiel de contact</label>
-                        <input 
-                          type="email" 
-                          required
-                          value={newSchoolEmail}
-                          onChange={(e) => setNewSchoolEmail(e.target.value)}
-                          placeholder="Ex: direction@saintjoseph.com" 
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs font-bold text-slate-650 block mb-1">Code / Clé d'activation unique</label>
-                        <div className="flex gap-2">
-                          <input 
-                            type="text" 
-                            required
-                            value={newSchoolCode}
-                            onChange={(e) => setNewSchoolCode(e.target.value.toUpperCase())}
-                            className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-mono font-bold text-primary"
-                          />
-                          <button 
-                            type="button" 
-                            onClick={generateRandomSchoolCode}
-                            className="bg-slate-100 hover:bg-slate-200 text-xs font-bold px-3 rounded-xl transition-colors shrink-0"
-                          >
-                            Générer
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-2 justify-end">
-                      <button 
-                        type="button" 
-                        onClick={() => setIsAddingSchool(false)}
-                        className="px-4 py-2 bg-slate-100 hover:bg-slate-205 text-slate-700 text-sm font-bold rounded-xl transition-colors"
-                      >
-                        Annuler
-                      </button>
-                      <button 
-                        type="submit" 
-                        className="px-4 py-2 bg-primary hover:bg-primary/90 text-white text-sm font-bold rounded-xl transition-all shadow-md shadow-primary/10"
-                      >
-                        Enregistrer l'École
-                      </button>
-                    </div>
-
-                    <div className="bg-amber-50 p-4 rounded-xl border border-amber-100 text-xs font-medium text-amber-800 leading-relaxed">
-                      <strong>Note de Sécurité :</strong> Le mot de passe par défaut est <span className="font-mono bg-white px-1.5 py-0.5 rounded border font-bold text-red-600">kharandi2026</span>. Lorsque la direction entrera son Email et son Clé d'activation sur le portail d'école, le système l'obligera à le remplacer par un mot de passe robuste de son choix. En tant qu'administrateur suprême, vous ne possédez pas d'accès direct à ses futures données scolaires confidentielles.
-                    </div>
-                  </form>
-                </motion.div>
-              )}
-
-              {/* Partner grid/table */}
-              <div className="bg-white rounded-[32px] border border-slate-100 shadow-sm overflow-hidden">
-                {schools.length === 0 ? (
-                  <div className="p-12 text-center text-slate-400">
-                    <School size={48} className="mx-auto mb-3 text-slate-200" />
-                    <p className="font-bold">Aucun établissement enregistré</p>
-                    <p className="text-xs">Créez votre première école pour commencer l'enrôlement des établissements.</p>
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                      <thead>
-                        <tr className="bg-slate-50/50 border-b border-slate-100 text-xs font-bold text-slate-400 uppercase">
-                          <th className="py-4 pl-6">Code Activation</th>
-                          <th className="py-4">Nom de l'établissement</th>
-                          <th className="py-4">Email</th>
-                          <th className="py-4">Création</th>
-                          <th className="py-4">Liaison</th>
-                          <th className="py-4">Abonnement</th>
-                          <th className="py-4 pr-6 text-right">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-50">
-                        {schools.map((sc, index) => (
-                          <tr key={sc.id || index} className="hover:bg-slate-50/50 text-sm">
-                            <td className="py-4 pl-6 font-mono font-bold text-primary">
-                              <span 
-                                onClick={() => {
-                                  navigator.clipboard.writeText(sc.code);
-                                  toast.success(`Code ${sc.code} copié !`);
-                                }} 
-                                className="cursor-pointer hover:underline"
-                                title="Cliquez pour copier"
-                              >
-                                {sc.code}
-                              </span>
-                            </td>
-                            <td className="py-4 font-extrabold text-slate-800">{sc.name}</td>
-                            <td className="py-4 text-xs font-medium text-slate-500">{sc.email}</td>
-                            <td className="py-4 text-xs text-slate-400">
-                              {sc.createdAt ? new Date(sc.createdAt).toLocaleDateString() : 'N/A'}
-                            </td>
-                            <td className="py-4">
-                              {sc.isActivated ? (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-green-50 text-green-700 text-xs font-bold border border-green-200 rounded-full">
-                                  ✓ Lié / Activé
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-50 text-amber-700 text-xs font-bold border border-amber-200 rounded-full animate-pulse">
-                                  En attente
-                                </span>
-                              )}
-                            </td>
-                            <td className="py-4">
-                              <span className={`px-2.5 py-1 text-xs font-bold border rounded-full ${
-                                sc.status === 'active' 
-                                  ? 'bg-green-50 border-green-200 text-green-700' 
-                                  : 'bg-red-50 border-red-205 text-red-700'
-                              }`}>
-                                {sc.status === 'active' ? 'Actif' : 'Suspendu'}
-                              </span>
-                            </td>
-                            <td className="py-4 pr-6 text-right">
-                              <div className="flex items-center justify-end gap-2">
-                                <button 
-                                  onClick={() => handleToggleSchoolSubscription(sc.id, sc.status)}
-                                  className={`text-xs font-bold px-3 py-1.5 rounded-xl transition-all border ${
-                                    sc.status === 'active' 
-                                      ? 'bg-red-50 hover:bg-red-100 text-red-600 border-red-100' 
-                                      : 'bg-green-50 hover:bg-green-100 text-green-600 border-green-100'
-                                  }`}
-                                >
-                                  {sc.status === 'active' ? 'Suspendre' : 'Activer'}
-                                </button>
-                                <button 
-                                  onClick={() => handleDeleteSchool(sc.id)}
-                                  className="text-slate-400 hover:text-red-600 p-1 bg-slate-50 hover:bg-red-50 rounded"
-                                >
-                                  <Trash2 size={16} />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
               </div>
             </div>
           )}

@@ -12,7 +12,7 @@ type Step = 'phone' | 'otp' | 'password' | 'new_password' | 'reset_otp' | 'reset
 type Mode = 'login' | 'register';
 
 export const Login: React.FC = () => {
-  const { setGuestMode, setDemoMode } = useAuth();
+  const { setGuestMode } = useAuth();
   const [mode,        setMode]        = useState<Mode>('login');
   const [step,        setStep]        = useState<Step>('phone');
   const [phone,       setPhone]       = useState('');
@@ -49,12 +49,6 @@ export const Login: React.FC = () => {
   };
 
   const _go = () => { window.location.href = '/'; };
-
-  const handleDemoLogin = (selectedRole: string = 'admin') => {
-    setDemoMode(selectedRole);
-    toast.success(`Connexion au Compte Démo réussie ! Accès complet activé.`);
-    window.location.href = '/';
-  };
 
   const sendOTP = async (p: string) => {
     await api.post('/auth/otp/send/', { phone: p });
@@ -563,75 +557,6 @@ export const Login: React.FC = () => {
               ? "Nous vous enverrons un code SMS gratuit pour prouver la propriété de votre numéro."
               : ""}
           </p>
-
-          {/* Mode Compte Démo - Accès Immédiat et Complet */}
-          <div className="mt-5 pt-4 border-t border-slate-100 text-left">
-            <div className="bg-gradient-to-br from-[#18bfd6]/10 via-[#18bfd6]/5 to-[#fcb303]/10 border border-[#18bfd6]/20 rounded-2xl p-4 relative overflow-hidden shadow-xs">
-              <div className="flex items-center justify-between gap-2 mb-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 bg-[#18bfd6]/15 text-[#18bfd6] rounded-lg flex items-center justify-center shrink-0 font-bold">
-                    <ShieldCheck size={16} />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-black text-slate-900">Mode Compte Démo</h4>
-                    <p className="text-[10px] font-bold text-slate-500">Accès immédiat à toutes les fonctionnalités</p>
-                  </div>
-                </div>
-                <span className="text-[9px] font-black uppercase tracking-wider bg-[#18bfd6] text-white px-2 py-0.5 rounded-full shadow-2xs shrink-0">
-                  Accès Total
-                </span>
-              </div>
-
-              <p className="text-[11px] text-slate-600 font-medium mb-3 leading-relaxed">
-                Explorez l'intégralité de la plateforme Kharandi (Scolaire, Exo Gagnant, Répétiteurs, Calcul mental, Wallet, Marketplace) sans code SMS.
-              </p>
-
-              <button
-                type="button"
-                onClick={() => handleDemoLogin('admin')}
-                className="w-full py-3 px-4 bg-gradient-to-r from-[#18bfd6] to-[#fcb303] hover:opacity-95 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-xs transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <ShieldCheck size={15} />
-                Se connecter au Compte Démo (Accès Complet)
-              </button>
-
-              <div className="mt-3 pt-2.5 border-t border-slate-200/50">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5 text-center">
-                  Tester un rôle spécifique :
-                </p>
-                <div className="grid grid-cols-2 gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => handleDemoLogin('student')}
-                    className="py-1.5 px-2 bg-white/90 hover:bg-white text-slate-700 font-bold text-[10px] rounded-lg border border-slate-200 text-center transition-all cursor-pointer hover:border-[#18bfd6] hover:text-[#18bfd6]"
-                  >
-                    🎓 Élève VIP
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDemoLogin('teacher')}
-                    className="py-1.5 px-2 bg-white/90 hover:bg-white text-slate-700 font-bold text-[10px] rounded-lg border border-slate-200 text-center transition-all cursor-pointer hover:border-[#18bfd6] hover:text-[#18bfd6]"
-                  >
-                    👨‍🏫 Enseignant
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDemoLogin('parent')}
-                    className="py-1.5 px-2 bg-white/90 hover:bg-white text-slate-700 font-bold text-[10px] rounded-lg border border-slate-200 text-center transition-all cursor-pointer hover:border-[#18bfd6] hover:text-[#18bfd6]"
-                  >
-                    👨‍👩‍👧 Parent
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDemoLogin('ecole')}
-                    className="py-1.5 px-2 bg-white/90 hover:bg-white text-slate-700 font-bold text-[10px] rounded-lg border border-slate-200 text-center transition-all cursor-pointer hover:border-[#18bfd6] hover:text-[#18bfd6]"
-                  >
-                    🏫 Établissement
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
         </motion.div>
         
         {/* Support contacts */}

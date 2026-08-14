@@ -36,7 +36,7 @@ import { api } from '../../config/api';
 
 const DEFAULT_PRODUCTS = [
   {
-    id: "demo-sac-dos",
+    id: "prod-sac-dos",
     title: "Sac à dos Ergonomique Kharandi Premium",
     price: 95000,
     category: "Sacs & Accessoires",
@@ -47,7 +47,7 @@ const DEFAULT_PRODUCTS = [
     badge: "Populaire"
   },
   {
-    id: "demo-paquet-bic",
+    id: "prod-paquet-bic",
     title: "Paquet Stylo à bille Bic Couleur Classic Réf SM00811",
     price: 55000,
     category: "Écriture / Stylos",
@@ -58,7 +58,7 @@ const DEFAULT_PRODUCTS = [
     badge: "Essentiel scolaire"
   },
   {
-    id: "demo-paquet-cahier",
+    id: "prod-paquet-cahier",
     title: "Cahier 192 pages Calligraphe grands carreaux Série Ligne 8000",
     price: 25000,
     category: "Cahiers & Papeterie",
@@ -69,7 +69,7 @@ const DEFAULT_PRODUCTS = [
     badge: "Meilleure Offre"
   },
   {
-    id: "demo-trousse-complete",
+    id: "prod-trousse-complete",
     title: "Trousse Scolaire Complète avec Kit de Géométrie Maped",
     price: 45000,
     category: "Sacs & Accessoires",
@@ -80,7 +80,7 @@ const DEFAULT_PRODUCTS = [
     badge: "Kit Complet"
   },
   {
-    id: "demo-annales-bac",
+    id: "prod-annales-bac",
     title: "Livre d'Annales Bac de Mathématiques & Sciences Physiques",
     price: 75000,
     category: "Livres & Guides",
@@ -106,8 +106,7 @@ export const Marketplace: React.FC<{ setActiveTab: (tab: string) => void }> = ({
     getProducts()
       .then(data => {
         const fetched = data || [];
-        // Combined list ensuring no duplicate IDs
-        const combined = [...DEFAULT_PRODUCTS, ...fetched.filter((item: any) => !item.id.toString().startsWith('demo-'))];
+        const combined = [...DEFAULT_PRODUCTS, ...fetched.filter((item: any) => !item.id.toString().startsWith('prod-'))];
         setProducts(combined);
       })
       .catch(() => {

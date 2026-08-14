@@ -11,7 +11,6 @@ import { CartProvider }    from './contexts/CartContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ErrorBoundary }   from './components/ErrorBoundary';
 import { Toaster }         from 'sonner';
-import { EcoleApp }        from './components/ecole/EcoleApp';
 import { AdminDashboard }  from './components/features/AdminDashboard';
 import { Onboarding }      from './components/features/Onboarding';
 import { MaintenanceMode } from './components/features/MaintenanceMode';
@@ -84,8 +83,6 @@ function AppRoutes() {
         <Route path="/paiement/echec"   element={<PaymentFailure />} />
         <Route path="/payment/success"  element={<PaymentSuccess />} />
         <Route path="/payment/failure"  element={<PaymentFailure />} />
-        <Route path="/ecole/*"
-          element={<EcoleApp />} />
         <Route path="/admin"
           element={isAuthenticated && isAdmin ? <AdminDashboard /> : <Navigate to="/" />} />
         <Route path="/*"

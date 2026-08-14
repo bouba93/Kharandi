@@ -16,17 +16,15 @@ interface AuthContextType {
   userProfile: UserProfile | null;
   isAuthReady: boolean;
   isGuest: boolean;
-  isDemoMode: boolean;
   setGuestMode: (isGuest: boolean) => void;
-  setDemoMode: (role?: string) => void;
   logout: () => void;
   refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null, userProfile: null, isAuthReady: false,
-  isGuest: false, isDemoMode: false,
-  setGuestMode: () => {}, setDemoMode: () => {}, logout: () => {},
+  isGuest: false,
+  setGuestMode: () => {}, logout: () => {},
   refreshProfile: async () => {},
 });
 
@@ -84,7 +82,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [isGuest,     setIsGuest]     = useState(false);
-  const [isDemoMode,  setIsDemoMode]  = useState(() => localStorage.getItem('kharandi_demo_mode') === 'true');
 
   const setGuestMode = (guest: boolean) => {
     setIsGuest(guest);
@@ -95,50 +92,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const setDemoMode = (role: string = 'admin') => {
-    const roleTitles: Record<string, string> = {
-      admin: 'Compte Démo (Administrateur)',
-      student: 'Compte Démo (Élève VIP)',
-      teacher: 'Compte Démo (Enseignant / Répétiteur)',
-      parent: 'Compte Démo (Parent d\'élève)',
-      ecole: 'Compte Démo (Établissement Scolaire)',
-    };
-
-    const demoProfile: UserProfile = {
-      uid: `demo-${role}-full`,
-      email: `demo.${role}@kharandi.gn`,
-      phone: '+224626187117',
-      role: role,
-      name: roleTitles[role] || 'Compte Démo (Accès Complet)',
-      interests: ['Mathématiques', 'Sciences', 'Calcul Mental', 'Boulier', 'Examens'],
-      onboardingCompleted: true,
-      isApproved: true,
-      points: 2500,
-      subscriptionPlan: 'annuel',
-      activeAddons: ['all', 'student_access', 'school_access', 'tutor_access'],
-      city: 'Conakry',
-      shopName: 'Boutique Modèle Kharandi',
-      shopDescription: 'Boutique exemple avec démonstration d\'articles et commandes'
-    };
-
-    localStorage.setItem('access_token', 'demo_access_token_kharandi');
-    localStorage.setItem('kharandi_demo_mode', 'true');
-    localStorage.setItem('kharandi_cached_profile', JSON.stringify(demoProfile));
-    localStorage.removeItem('isGuest');
-    
-    setIsGuest(false);
-    setIsDemoMode(true);
-    setUserProfile(demoProfile);
-    setIsAuthReady(true);
-  };
-
   const logout = () => {
     djangoLogout();
     setUserProfile(null);
     setIsGuest(false);
-    setIsDemoMode(false);
     localStorage.removeItem('isGuest');
-    localStorage.removeItem('kharandi_demo_mode');
     localStorage.removeItem('kharandi_cached_profile');
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
@@ -146,21 +104,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const fetchProfile = async () => {
-    const isDemo = localStorage.getItem('kharandi_demo_mode') === 'true';
     const cached = localStorage.getItem('kharandi_cached_profile');
-
-    if (isDemo && cached) {
-      try {
-        const parsed = JSON.parse(cached);
-        setUserProfile(parsed);
-        setIsDemoMode(true);
-        setIsAuthReady(true);
-        return;
-      } catch {
-        // Cache corrompu
-      }
-    }
-
     const token = localStorage.getItem('access_token');
     if (!token) {
       if (localStorage.getItem('isGuest') === 'true') {
@@ -203,17 +147,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('kharandi_cached_profile', JSON.stringify(profile));
     } catch (err: any) {
       if (err?.response?.status === 401) {
-        // Token expiré → déconnecter seulement si pas en mode démo
-        if (!isDemo) {
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('refresh_token');
-          localStorage.removeItem('kharandi_cached_profile');
-          setUserProfile(null);
-        }
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('kharandi_cached_profile');
+        setUserProfile(null);
         setIsAuthReady(true);
       } else {
-        // Erreur réseau / Render endormi → garder le cache, rester connecté
-        if (!cached && !isDemo) setUserProfile(null);
+        // Erreur réseau / backend endormi → garder le cache si dispo
+        if (!cached) setUserProfile(null);
         setIsAuthReady(true);
       }
     }
@@ -234,7 +175,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user: userProfile, userProfile, isAuthReady, isGuest, isDemoMode, setGuestMode, setDemoMode, logout, refreshProfile: fetchProfile }}>
+    <AuthContext.Provider value={{ user: userProfile, userProfile, isAuthReady, isGuest, setGuestMode, logout, refreshProfile: fetchProfile }}>
       {children}
     </AuthContext.Provider>
   );

@@ -11,7 +11,7 @@ const ZONES = ['Kaloum','Dixinn','Matam','Ratoma','Matoto','Coyah','Dubréka','A
 
 const DEFAULT_TUTORS = [
   {
-    id: "demo-tutor-1",
+    id: "tutor-default-1",
     phone: "+224 622 45 45 88",
     profile: {
       first_name: "Amadou",
@@ -27,7 +27,7 @@ const DEFAULT_TUTORS = [
     avatarColor: "bg-[#18bfd6]/10 text-[#18bfd6]"
   },
   {
-    id: "demo-tutor-2",
+    id: "tutor-default-2",
     phone: "+224 621 89 01 23",
     profile: {
       first_name: "Mme Fatoumata",
@@ -43,7 +43,7 @@ const DEFAULT_TUTORS = [
     avatarColor: "bg-[#fcb303]/10 text-[#fcb303]"
   },
   {
-    id: "demo-tutor-3",
+    id: "tutor-default-3",
     phone: "+224 628 34 56 78",
     profile: {
       first_name: "Souleymane",
@@ -92,7 +92,7 @@ export const Tutors: React.FC = () => {
           const fetchedTutors = data?.data || [];
           setTutors([
             ...DEFAULT_TUTORS,
-            ...fetchedTutors.filter((t: any) => !t.id?.toString().startsWith('demo-'))
+            ...fetchedTutors.filter((t: any) => !t.id?.toString().startsWith('tutor-default-'))
           ]);
         }
       } catch { }

@@ -197,7 +197,7 @@ export const MaintenanceMode: React.FC = () => {
           </div>
         </motion.div>
 
-        {/* Discreet Entrance Link for Admins, Schools & VIPs */}
+        {/* Discreet Entrance Link for Admins & VIPs */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -206,19 +206,10 @@ export const MaintenanceMode: React.FC = () => {
         >
           <button 
             type="button"
-            onClick={() => navigate('/ecole')}
-            className="w-full sm:w-auto group flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-full bg-gradient-to-r from-[#18bfd6] to-[#15adc1] hover:from-[#15adc1] hover:to-[#18bfd6] text-white cursor-pointer shadow-lg shadow-[#18bfd6]/10 hover:shadow-xl hover:shadow-[#18bfd6]/20 transition-all text-xs font-black uppercase tracking-wider transform active:scale-95 duration-200"
-          >
-            <span>🎒 Accéder à Kharandi École</span>
-            <ArrowRight size={13} className="transition-all transform group-hover:translate-x-1" />
-          </button>
-
-          <button 
-            type="button"
             onClick={() => navigate('/login')}
-            className="w-full sm:w-auto group flex items-center justify-center gap-2 px-5 py-3 rounded-full border border-slate-200 hover:border-[#18bfd6]/30 bg-white hover:bg-[#18bfd6]/5 cursor-pointer shadow-sm text-slate-500 hover:text-[#18bfd6] transition-all text-xs font-extrabold"
+            className="w-full sm:w-auto group flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-gradient-to-r from-[#18bfd6] to-[#15adc1] hover:from-[#15adc1] hover:to-[#18bfd6] text-white cursor-pointer shadow-lg shadow-[#18bfd6]/10 hover:shadow-xl hover:shadow-[#18bfd6]/20 transition-all text-xs font-black uppercase tracking-wider transform active:scale-95 duration-200"
           >
-            <Shield size={13} className="text-[#fcb303] fill-[#fcb303]/10" />
+            <Shield size={13} className="text-white" />
             <span>Portail VIP / Admin</span>
           </button>
         </motion.div>

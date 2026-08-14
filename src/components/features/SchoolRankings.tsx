@@ -24,7 +24,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { toast } from 'sonner';
 
 export const SchoolRankings: React.FC = () => {
-  const { userProfile, isDemoMode } = useAuth();
+  const { userProfile } = useAuth();
   const [schools, setSchools] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [paying, setPaying] = useState(false);
@@ -34,7 +34,6 @@ export const SchoolRankings: React.FC = () => {
 
   const isSubscribedToPalmares = unlocked || 
     userProfile?.role === 'admin' || 
-    isDemoMode || 
     userProfile?.subscriptionPlan === 'palmares' || 
     userProfile?.subscriptionPlan === 'annuel' || 
     userProfile?.activeAddons?.includes('palmares');

@@ -117,23 +117,6 @@ export const Grades: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* Dynamic Link Banner for Kharandi École */}
-      <div className="bg-gradient-to-r from-[#18bfd6]/10 to-[#fcb303]/10 border-2 border-[#18bfd6]/20 rounded-[28px] p-6 mb-6 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
-        <div className="text-left">
-          <span className="text-[10px] font-black uppercase tracking-widest text-[#18bfd6] bg-[#18bfd6]/10 px-2.5 py-1 rounded-md">Portail Scolaire Intégral</span>
-          <h3 className="font-extrabold text-[#0F172A] text-base mt-2">Vous êtes Parent, Enseignant ou Directeur ?</h3>
-          <p className="text-xs text-slate-500 font-semibold mt-1 leading-relaxed">
-            Gérez votre établissement scolaire, enregistrez les notes d'élèves, suivez le règlement de scolarité ou téléchargez des bulletins sur la plateforme complète dédiée.
-          </p>
-        </div>
-        <button 
-          onClick={() => window.location.href = '/ecole'}
-          className="shrink-0 w-full md:w-auto px-5 py-3.5 bg-gradient-to-r from-[#18bfd6] to-[#15adc1] hover:from-[#15adc1] hover:to-[#18bfd6] text-white rounded-2xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-[#18bfd6]/10 transition-all hover:scale-[1.02] transform active:scale-95 duration-200"
-        >
-          <span>Ouvrir l'École v2 🎒</span>
-        </button>
-      </div>
-
       {grades.length === 0 ? (
         <div className="text-center py-16 bg-white rounded-[24px] border border-slate-100">
           <GraduationCap size={48} className="mx-auto mb-3 text-slate-200" />

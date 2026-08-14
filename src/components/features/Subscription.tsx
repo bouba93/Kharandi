@@ -20,7 +20,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { toast } from 'sonner';
 import { getPlans, getSubscriptionStatus, initiateSubscription } from '../../services/payments';
 
-type TabType = 'STUDENT' | 'PALMARES' | 'TUTOR' | 'SELLER' | 'SCHOOL' | 'CERTIFICATION';
+type TabType = 'STUDENT' | 'PALMARES' | 'TUTOR' | 'SELLER' | 'CERTIFICATION';
 
 export const Subscription: React.FC = () => {
   const { userProfile } = useAuth();
@@ -40,10 +40,6 @@ export const Subscription: React.FC = () => {
   // Section C: Seller Options
   const [sellerOptionHighlight, setSellerOptionHighlight] = useState(false); // +20K GNF / mois
   const [sellerOptionBoost, setSellerOptionBoost] = useState(false); // +15K GNF / semaine
-  
-  // Section D: School simulator
-  const [studentCount, setStudentCount] = useState<number>(100);
-  const [schoolOptionBulletins, setSchoolOptionBulletins] = useState(true); // +40K GNF / élève / an
 
   useEffect(() => {
     const fetchData = async () => {
@@ -150,16 +146,6 @@ export const Subscription: React.FC = () => {
     handleDirectPayment(price, "Forfait Vendeur & Boutique");
   };
 
-  // Helper to purchase Kharandi School Package
-  const handleSchoolPurchase = () => {
-    const basePerStudent = 60000;
-    const optionalPerStudent = schoolOptionBulletins ? 40000 : 0;
-    const totalRate = basePerStudent + optionalPerStudent;
-    const totalAmount = studentCount * totalRate;
-    
-    handleDirectPayment(totalAmount, `Forfait - Kharandi École (${studentCount} Élèves - ${totalRate} GNF/élève)`);
-  };
-
   if (fetchingData) {
     return (
       <div className="flex items-center justify-center min-h-[500px]">
@@ -171,11 +157,6 @@ export const Subscription: React.FC = () => {
     );
   }
 
-  // School computations
-  const schoolBaseTotal = studentCount * 60000;
-  const schoolBulletinsTotal = schoolOptionBulletins ? studentCount * 40000 : 0;
-  const schoolCombinedTotal = schoolBaseTotal + schoolBulletinsTotal;
-
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       
@@ -185,7 +166,7 @@ export const Subscription: React.FC = () => {
           Abonnements <span className="text-primary">Kharandi</span>
         </h1>
         <p className="text-slate-500 text-base md:text-lg max-w-2xl mx-auto">
-          Choisissez l'offre qui correspond le mieux à vos besoins d'apprentissage, de tutorat, de commerce ou de gestion d'école.
+          Choisissez l'offre qui correspond le mieux à vos besoins d'apprentissage, de tutorat ou de commerce.
         </p>
       </div>
 
@@ -196,7 +177,6 @@ export const Subscription: React.FC = () => {
           { id: 'PALMARES', label: 'Pass Palmarès (250K)', icon: Trophy, color: 'hover:text-amber-600' },
           { id: 'TUTOR', label: 'Répétiteurs', icon: UserCheck, color: 'hover:text-secondary' },
           { id: 'SELLER', label: 'Vendeur (Boutique)', icon: Store, color: 'hover:text-accent' },
-          { id: 'SCHOOL', label: 'Forfait - Kharandi École', icon: School, color: 'hover:text-primary' },
           { id: 'CERTIFICATION', label: 'Formations', icon: Award, color: 'hover:text-secondary' },
         ].map(tab => {
           const Icon = tab.icon;
@@ -595,129 +575,6 @@ export const Subscription: React.FC = () => {
                     <>Souscrire & Propulser <ArrowRight size={16} /></>
                   )}
                 </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* D. FORFAIT - KHARANDI ÉCOLE */}
-        {activeTab === 'SCHOOL' && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start max-w-6xl mx-auto">
-            <div className="lg:col-span-12 mb-2">
-              <span className="bg-purple-100 text-purple-700 font-extrabold text-[10px] px-3 py-1 rounded-full uppercase tracking-wider">Solution Institutionnelle</span>
-              <h2 className="text-3xl font-black text-slate-900 mt-2">Forfait - Kharandi École</h2>
-              <p className="text-slate-500 mt-1 font-medium">
-                Digitalisez entièrement votre établissement avec des espaces administratifs de pointe, bulletins dématérialisés et d'incroyables communications directes parents-enseignants.
-              </p>
-            </div>
-
-            <div className="lg:col-span-7 space-y-6">
-              {/* Feature grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-white border border-slate-200/60 rounded-3xl p-5 space-y-3">
-                  <span className="text-[10px] font-black uppercase text-purple-600 bg-purple-50 px-2.5 py-1 rounded-lg">Inclus (FULL PACKAGE)</span>
-                  <p className="text-2xl font-black text-slate-900">60 000 GNF<span className="text-[11px] text-slate-400 font-bold"> / élève / an</span></p>
-                  
-                  <ul className="space-y-2 text-slate-600 text-[11px] font-bold">
-                    <li className="flex items-center gap-2">✓ Enregistrement des élèves avec ID unique</li>
-                    <li className="flex items-center gap-2">✓ Gestion des classes et des matières</li>
-                    <li className="flex items-center gap-2">✓ Calcul automatique des notes et moyennes</li>
-                    <li className="flex items-center gap-2">✓ Génération de bulletins scolaires digitaux</li>
-                    <li className="flex items-center gap-2">✓ Suivi des absences, retards et conduite</li>
-                    <li className="flex items-center gap-2">✓ Alertes automatisées de baisse de niveau</li>
-                    <li className="flex items-center gap-2">✓ Tableau de bord administratif complet</li>
-                    <li className="flex items-center gap-2">✓ Communication directe et sécurisée</li>
-                    <li className="flex items-center gap-2">✓ Interface vocale inclusive en langues locales</li>
-                  </ul>
-                </div>
-
-                <div className={`p-5 rounded-3xl border transition-all ${
-                  schoolOptionBulletins 
-                    ? 'border-purple-400 bg-purple-50/20' 
-                    : 'border-slate-200/60 bg-white'
-                }`}>
-                  <div className="flex justify-between items-start mb-2">
-                    <span className="text-[10px] font-black uppercase text-purple-600 bg-purple-50 px-2.5 py-1 rounded-lg">Optionnel</span>
-                    <input 
-                      type="checkbox" 
-                      checked={schoolOptionBulletins} 
-                      onChange={(e) => setSchoolOptionBulletins(e.target.checked)}
-                      className="accent-purple-600 h-4 w-4" 
-                    />
-                  </div>
-                  
-                  <p className="text-xl font-black text-slate-900">Option Bulletins, Badges & Certificats</p>
-                  <p className="text-purple-700 font-extrabold text-sm mb-3">+ 40 000 GNF <span className="text-[10px] text-slate-400">/ élève / an</span></p>
-
-                  <ul className="space-y-2 text-slate-500 text-[11px] font-medium font-bold">
-                    <li className="flex items-center gap-2">✓ Création de magnifiques badges de mérite</li>
-                    <li className="flex items-center gap-2">✓ Génération de certificats d'excellence imprimables</li>
-                    <li className="flex items-center gap-2">✓ Suivi des paiements de scolarité (réel)</li>
-                    <li className="flex items-center gap-2">✓ Statut temps réel (payé / partiel / impayé)</li>
-                    <li className="flex items-center gap-2">✓ Envoi automatique des bulletins via WhatsApp/E-mail</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            <div className="lg:col-span-5 bg-white border border-slate-200/80 rounded-[32px] p-6 shadow-md">
-              <h3 className="font-black text-slate-900 text-sm mb-4 flex items-center gap-1">
-                <Target size={16} className="text-purple-600" />
-                Simulateur de budget établissement
-              </h3>
-
-              <div className="space-y-4 bg-slate-50 p-4 rounded-2xl border border-slate-100/80">
-                <div>
-                  <label className="text-xs font-black text-slate-600 block mb-1">Nombre estimatif d'élèves : {studentCount}</label>
-                  <input 
-                    type="range" 
-                    min="10" 
-                    max="1500" 
-                    step="10"
-                    value={studentCount} 
-                    onChange={(e) => setStudentCount(Number(e.target.value))}
-                    className="w-full accent-purple-600 h-2 bg-slate-200 rounded-lg cursor-pointer" 
-                  />
-                  <div className="flex justify-between text-[10px] font-bold text-slate-400 mt-1">
-                    <span>10 élèves</span>
-                    <span>1 500 élèves</span>
-                  </div>
-                </div>
-
-                <div className="space-y-2 text-xs font-bold text-slate-600">
-                  <div className="flex justify-between">
-                    <span>Full Package (60k GNF / élève) :</span>
-                    <span className="text-slate-800">{schoolBaseTotal.toLocaleString()} GNF</span>
-                  </div>
-                  {schoolOptionBulletins && (
-                    <div className="flex justify-between text-purple-600">
-                      <span>Option Bulletins (40k GNF / élève) :</span>
-                      <span>+ {schoolBulletinsTotal.toLocaleString()} GNF</span>
-                    </div>
-                  )}
-                  <div className="h-[1px] bg-slate-200 my-2" />
-                  <div className="flex justify-between font-black text-sm text-slate-900 pt-1">
-                    <span>Devis estimatif TOTAL :</span>
-                    <span className="text-primary">{schoolCombinedTotal.toLocaleString()} GNF / an</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-4">
-                <button
-                  onClick={handleSchoolPurchase}
-                  disabled={loading}
-                  className="w-full py-4 text-xs font-black text-white bg-purple-600 hover:bg-purple-700 rounded-xl transition-all shadow-md shadow-purple-600/10 flex items-center justify-center gap-1.5"
-                >
-                  {loading ? (
-                    <><Loader2 className="animate-spin" size={16} /> Patientez...</>
-                  ) : (
-                    <>Souscrire pour cet établissement ({schoolCombinedTotal.toLocaleString()} GNF) <ArrowRight size={14} /></>
-                  )}
-                </button>
-                <p className="text-[10px] text-slate-400 font-extrabold text-center mt-2 uppercase">
-                  ✓ Devis immédiat avec contrat en un clic
-                </p>
               </div>
             </div>
           </div>
