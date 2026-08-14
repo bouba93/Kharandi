@@ -35,13 +35,13 @@ export async function initiateSubscription(plan_id: string, currency = "GNF") {
 }
 
 export async function initiatePayment(payload: {
-  amount:    number;
+  amount?:   number;
   currency?: string;
   order_id?: string;
   return_url?: string;
 }) {
   const { data } = await api.post("/payments/initiate/", payload);
-  return data.data;
+  return data?.data || data;
 }
 
 export async function getTransactions() {

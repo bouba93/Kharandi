@@ -18,9 +18,35 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { toast } from 'sonner';
-import { getPlans, getSubscriptionStatus, initiateSubscription } from '../../services/payments';
+import { getPlans, getSubscriptionStatus, initiateSubscription, initiatePayment } from '../../services/payments';
+import { createOrder } from '../../services/orders';
 
 type TabType = 'STUDENT' | 'PALMARES' | 'TUTOR' | 'SELLER' | 'CERTIFICATION';
+
+const FORMATIONS = [
+  {
+    id: "bureautique-base",
+    name: "Bureautique — Niveau de base",
+    price: 100000,
+    currency: "GNF",
+    badge: "Niveau Base",
+    content: "Word, Excel, Windows + Certification officielle KHARANDI.",
+    bgColor: "from-emerald-50 to-emerald-100/40 border-emerald-100",
+    textColor: "text-emerald-700",
+    btnColor: "bg-emerald-600 hover:bg-emerald-700",
+  },
+  {
+    id: "performance-pro",
+    name: "Bureautique — Niveau avancé",
+    price: 300000,
+    currency: "GNF",
+    badge: "Performance Pro",
+    content: "Excel avancé (tableaux de bord croisés), PowerPoint professionnel, présentations d'impact + Certification officielle KHARANDI.",
+    bgColor: "from-indigo-50 to-indigo-100/40 border-indigo-100",
+    textColor: "text-indigo-700",
+    btnColor: "bg-primary hover:bg-primary/95",
+  },
+];
 
 export const Subscription: React.FC = () => {
   const { userProfile } = useAuth();
@@ -86,6 +112,50 @@ export const Subscription: React.FC = () => {
     } catch (err: any) {
       console.error('Erreur abonnement:', err);
       toast.error(err.response?.data?.message || "Erreur lors de l'activation.");
+    } finally {
+      setLoading(false);
+      setLoadingPlanId(null);
+    }
+  };
+
+  // Helper to purchase Certifying Training through Orders -> Payment flow
+  const handleBuyFormation = async (formation: typeof FORMATIONS[0]) => {
+    const token = localStorage.getItem('access_token');
+    if (!token && !userProfile) {
+      toast.error('Vous devez être connecté pour acheter une formation.');
+      return;
+    }
+    setLoading(true);
+    setLoadingPlanId(formation.id);
+    try {
+      // 1. Création de la commande (Order) avec montant 100 000 GNF ou 300 000 GNF
+      const orderData = await createOrder([
+        {
+          document_id: formation.id,
+          name: formation.name,
+          unit_price: formation.price,
+          quantity: 1,
+        }
+      ], formation.currency || "GNF");
+
+      const orderId = orderData?.id || orderData?.order_id || orderData?.pk;
+      if (!orderId) {
+        throw new Error("Identifiant de commande introuvable.");
+      }
+
+      // 2. Appel POST /payments/initiate/ avec { order_id }
+      const payData = await initiatePayment({
+        order_id: orderId,
+      });
+
+      if (payData?.payment_url) {
+        window.location.href = payData.payment_url;
+      } else {
+        toast.error("Impossible de générer le lien de paiement.");
+      }
+    } catch (err: any) {
+      console.error("Erreur achat formation:", err);
+      toast.error(err.response?.data?.message || err.message || "Erreur lors du paiement de la formation.");
     } finally {
       setLoading(false);
       setLoadingPlanId(null);
@@ -602,54 +672,38 @@ export const Subscription: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {[
-                {
-                  title: "Bureautique — Niveau de base",
-                  price: 100000,
-                  badge: "Niveau Base",
-                  content: "Word, Excel, Windows + Certification officielle KHARANDI.",
-                  bgColor: "from-emerald-50 to-emerald-100/40 border-emerald-100",
-                  textColor: "text-emerald-700",
-                  btnColor: "bg-emerald-600 hover:bg-emerald-700",
-                },
-                {
-                  title: "Bureautique — Niveau avancé",
-                  price: 300000,
-                  badge: "Performance Pro",
-                  content: "Excel avancé (tableaux de bord croisés), PowerPoint professionnel, présentations d'impact + Certification officielle KHARANDI.",
-                  bgColor: "from-indigo-50 to-indigo-100/40 border-indigo-100",
-                  textColor: "text-indigo-700",
-                  btnColor: "bg-primary hover:bg-primary/95",
-                }
-              ].map((course, idx) => (
-                <div key={idx} className={`bg-gradient-to-b ${course.bgColor} border-2 rounded-3xl p-6 flex flex-col justify-between shadow-sm`}>
-                  <div>
-                    <span className={`text-[9px] font-black uppercase px-2.5 py-1 bg-white rounded-lg inline-block border ${course.textColor} border-slate-100 shadow-sm mb-3`}>
-                      {course.badge}
-                    </span>
-                    <h3 className="text-xl font-black text-slate-900 leading-tight">{course.title}</h3>
-                    <p className="text-xs text-slate-600 font-semibold mt-2 leading-relaxed">{course.content}</p>
-                    
-                    <div className="flex items-baseline gap-1 mt-4 mb-2">
-                      <span className="text-2xl font-black text-slate-950">{course.price.toLocaleString()}</span>
-                      <span className="text-sm font-bold text-slate-500">GNF</span>
-                      <span className="text-slate-400 text-xs font-bold ml-1">· tarif unique</span>
+              {FORMATIONS.map((course) => {
+                const isThisLoading = loading && loadingPlanId === course.id;
+                return (
+                  <div key={course.id} className={`bg-gradient-to-b ${course.bgColor} border-2 rounded-3xl p-6 flex flex-col justify-between shadow-sm`}>
+                    <div>
+                      <span className={`text-[9px] font-black uppercase px-2.5 py-1 bg-white rounded-lg inline-block border ${course.textColor} border-slate-100 shadow-sm mb-3`}>
+                        {course.badge}
+                      </span>
+                      <h3 className="text-xl font-black text-slate-900 leading-tight">{course.name}</h3>
+                      <p className="text-xs text-slate-600 font-semibold mt-2 leading-relaxed">{course.content}</p>
+                      
+                      <div className="flex items-baseline gap-1 mt-4 mb-2">
+                        <span className="text-2xl font-black text-slate-950">{course.price.toLocaleString()}</span>
+                        <span className="text-sm font-bold text-slate-500">{course.currency}</span>
+                        <span className="text-slate-400 text-xs font-bold ml-1">· tarif unique</span>
+                      </div>
                     </div>
-                  </div>
 
-                  <button
-                    onClick={() => handleDirectPayment(course.price, course.title)}
-                    disabled={loading}
-                    className={`w-full py-3.5 rounded-xl font-black text-white text-xs transition-all flex items-center justify-center gap-1.5 mt-4 cursor-pointer hover:-translate-y-0.5 active:translate-y-0 ${course.btnColor}`}
-                  >
-                    {loading ? (
-                      <Loader2 className="animate-spin" size={14} />
-                    ) : (
-                      <>Acheter la formation certifiante <ArrowRight size={14} /></>
-                    )}
-                  </button>
-                </div>
-              ))}
+                    <button
+                      onClick={() => handleBuyFormation(course)}
+                      disabled={loading}
+                      className={`w-full py-3.5 rounded-xl font-black text-white text-xs transition-all flex items-center justify-center gap-1.5 mt-4 cursor-pointer hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 ${course.btnColor}`}
+                    >
+                      {isThisLoading ? (
+                        <><Loader2 className="animate-spin" size={14} /> Préparation de la commande...</>
+                      ) : (
+                        <>Acheter la formation certifiante <ArrowRight size={14} /></>
+                      )}
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
