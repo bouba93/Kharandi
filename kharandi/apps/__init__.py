@@ -1,1 +1,0 @@
-# kharandi apps package

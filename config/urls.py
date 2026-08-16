@@ -11,7 +11,6 @@ urlpatterns = [
     path('api/courses/', include('kharandi.apps.courses.urls')),
     path('api/notify/', include('kharandi.apps.notifications.urls')),
     path('api/search/', include('kharandi.apps.search.urls')),
-    path('api/results/', include('kharandi.apps.search.exam_urls')),
     path('api/reports/', include('kharandi.apps.reports.urls')),
     path('api/support/', include('kharandi.apps.support.urls')),
     path('api/ai/', include('kharandi.apps.ai_assistant.urls')),
