@@ -18,7 +18,7 @@ import rehypeKatex from 'rehype-katex';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../../contexts/AuthContext';
 import { toast } from 'sonner';
-import { api } from '../../config/api';
+import { api, fetchWithAuth } from '../../config/api';
 import { 
   ActiveSubjectData, 
   getActiveSubject, 
@@ -292,17 +292,12 @@ export const AITeacherChat: React.FC<AITeacherChatProps> = ({
           content: m.content,
         }));
 
-      const token = localStorage.getItem('access_token');
       abortRef.current = new AbortController();
 
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/ai/ask/stream/`,
+      const response = await fetchWithAuth(
+        '/ai/ask/stream/',
         {
           method:  'POST',
-          headers: {
-            'Content-Type':  'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
           body:   JSON.stringify({ 
             message: fullPromptToSend, 
             history 
@@ -311,7 +306,19 @@ export const AITeacherChat: React.FC<AITeacherChatProps> = ({
         }
       );
 
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.ok) {
+        const errorText = await response.text();
+        if (errorText.trim().startsWith('<!doctype') || errorText.trim().startsWith('<html')) {
+          throw new Error(`API error ${response.status}: Server returned HTML page instead of stream.`);
+        }
+        throw new Error(`API ${response.status}: ${errorText}`);
+      }
+
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("text/html")) {
+        const errorText = await response.text();
+        throw new Error(`API error: Received HTML response instead of SSE stream.`);
+      }
 
       const reader  = response.body!.getReader();
       const decoder = new TextDecoder();

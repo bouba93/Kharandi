@@ -9,7 +9,7 @@ export const StandaloneResultsReader: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [examResults, setExamResults] = useState<any[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [searchFilter, setSearchFilter] = useState('all'); // all, noms, pv, centre
   const [selectedResult, setSelectedResult] = useState<any | null>(null);
   const [activeExamTab, setActiveExamTab] = useState<'ALL' | 'CEE' | 'BEPC' | 'BEPC_FA' | 'BAC'>('ALL');
@@ -81,33 +81,46 @@ export const StandaloneResultsReader: React.FC = () => {
     setDisplayLimit(100);
   }, [activeExamTab, searchFilter, searchQuery]);
 
-  // Handle Search across exam categories (auto-loads when empty query)
+  // Handle Search across exam categories
   useEffect(() => {
     if (searchQuery.trim().length === 1) {
       return;
     }
 
-    const timer = setTimeout(() => {
+    const doFetch = async () => {
       setLoading(true);
       const examParam = activeExamTab === 'ALL' ? 'all' : activeExamTab.toLowerCase();
-      fetch(`/api/results/search?q=${encodeURIComponent(searchQuery.trim())}&exam=${examParam}&filter=${searchFilter}&limit=${displayLimit}`)
-        .then(res => {
-          const totalHeader = res.headers.get('X-Total-Count');
-          if (totalHeader) setTotalCount(parseInt(totalHeader, 10));
-          return res.json();
-        })
-        .then(data => {
-          const items = Array.isArray(data) ? data : (data.results || []);
-          setExamResults(items);
-          if (data.total) setTotalCount(data.total);
-        })
-        .catch(err => {
-          console.error("Error fetching exam results:", err);
-          setExamResults([]);
-        })
-        .finally(() => setLoading(false));
-    }, 300);
+      try {
+        const res = await fetch(`/api/results/search?q=${encodeURIComponent(searchQuery.trim())}&exam=${examParam}&filter=${searchFilter}&limit=${displayLimit}`);
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(`Search API ${res.status}: ${errText.slice(0, 100)}`);
+        }
+        const contentType = res.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          const errText = await res.text();
+          throw new Error(`Expected JSON, got HTML or other (${res.status}): ${errText.slice(0, 100)}`);
+        }
+        const totalHeader = res.headers.get('X-Total-Count');
+        if (totalHeader) setTotalCount(parseInt(totalHeader, 10));
+        const data = await res.json();
+        const items = Array.isArray(data) ? data : (data.results || []);
+        setExamResults(items);
+        if (data.total) setTotalCount(data.total);
+      } catch (err) {
+        console.error("Error fetching exam results:", err);
+        setExamResults([]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    if (!searchQuery.trim()) {
+      doFetch();
+      return;
+    }
+
+    const timer = setTimeout(doFetch, 300);
     return () => clearTimeout(timer);
   }, [searchQuery, searchFilter, activeExamTab, displayLimit]);
 

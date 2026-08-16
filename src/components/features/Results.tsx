@@ -31,7 +31,7 @@ export const Results: React.FC = () => {
       return;
     }
 
-    const timer = setTimeout(() => {
+    const timer = setTimeout(async () => {
       setSearchLoading(true);
       let examParam = 'all';
       if (activeFilter === 'CEE 2026') examParam = 'cee';
@@ -39,22 +39,29 @@ export const Results: React.FC = () => {
       else if (activeFilter === 'BEPC Franco-Arabe') examParam = 'bepc_fa';
       else if (activeFilter === 'BAC') examParam = 'bac';
 
-      fetch(`/api/results/search?q=${encodeURIComponent(searchQuery.trim())}&exam=${examParam}&filter=${searchFilter}&limit=${displayLimit}`)
-        .then(res => {
-          const totalHeader = res.headers.get('X-Total-Count');
-          if (totalHeader) setTotalCount(parseInt(totalHeader, 10));
-          return res.json();
-        })
-        .then(data => {
-          const items = Array.isArray(data) ? data : (data.results || []);
-          setSearchResults(items);
-          if (data.total) setTotalCount(data.total);
-        })
-        .catch(err => {
-          console.error("Error fetching search results:", err);
-          setSearchResults([]);
-        })
-        .finally(() => setSearchLoading(false));
+      try {
+        const res = await fetch(`/api/results/search?q=${encodeURIComponent(searchQuery.trim())}&exam=${examParam}&filter=${searchFilter}&limit=${displayLimit}`);
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(`Search API ${res.status}: ${errText.slice(0, 100)}`);
+        }
+        const contentType = res.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          const errText = await res.text();
+          throw new Error(`Expected JSON, got HTML or other (${res.status}): ${errText.slice(0, 100)}`);
+        }
+        const totalHeader = res.headers.get('X-Total-Count');
+        if (totalHeader) setTotalCount(parseInt(totalHeader, 10));
+        const data = await res.json();
+        const items = Array.isArray(data) ? data : (data.results || []);
+        setSearchResults(items);
+        if (data.total) setTotalCount(data.total);
+      } catch (err) {
+        console.error("Error fetching search results:", err);
+        setSearchResults([]);
+      } finally {
+        setSearchLoading(false);
+      }
     }, 300);
 
     return () => clearTimeout(timer);
