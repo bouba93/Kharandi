@@ -1024,7 +1024,15 @@ b- Expliquez : *Manger à sa faim*, *La coupe abusive du bois*, *Une eau stagnan
 
 export const FALLBACK_BAC_SUBJECTS: FallbackSubject[] = [
   ...BASE_FALLBACK_SUBJECTS,
-  ...(EXAM224_SUBJECTS as FallbackSubject[])
+  ...(EXAM224_SUBJECTS as FallbackSubject[]).filter((sub: any) => {
+    const isBac = sub.level && sub.level.toUpperCase().includes('BAC');
+    if (!isBac) return true;
+    const content = sub.content || '';
+    if (content.includes('erreurs de frappe') || content.includes('version transcrite') || content.includes('&hellip;&hellip;') || content.length < 100) {
+      return false;
+    }
+    return true;
+  })
 ];
 
 

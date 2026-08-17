@@ -41,12 +41,9 @@ export const Results: React.FC = () => {
       else if (activeFilter === 'BAC') examParam = 'bac';
 
       try {
-        const res = await fetchWithAuth(`/search/?q=${encodeURIComponent(searchQuery.trim())}&type=${searchFilter}&limit=${displayLimit}`);
+        const res = await fetch(`/api/results/search?q=${encodeURIComponent(searchQuery.trim())}&exam=${examParam}&filter=${searchFilter}&limit=${displayLimit}`);
         if (!res.ok) {
           const errText = await res.text();
-          if (res.status === 401 || res.status === 403) {
-            throw new Error(`Authentication required (401/403). Please log in.`);
-          }
           throw new Error(`Search API ${res.status}: ${errText.slice(0, 100)}`);
         }
         const contentType = res.headers.get("content-type");
@@ -54,26 +51,12 @@ export const Results: React.FC = () => {
           const errText = await res.text();
           throw new Error(`Expected JSON, got HTML or other (${res.status}): ${errText.slice(0, 100)}`);
         }
-        const json = await res.json();
-        const resultsContainer = json.data?.results || json.results || json.data || json;
-        let items: any[] = [];
-        if (Array.isArray(resultsContainer)) {
-          items = resultsContainer;
-        } else if (resultsContainer && typeof resultsContainer === 'object') {
-          items = [
-            ...(resultsContainer.documents || []),
-            ...(resultsContainer.qcm || []),
-            ...(resultsContainer.results || []),
-            ...(resultsContainer.items || []),
-            ...(resultsContainer.exam_results || [])
-          ];
-          if (items.length === 0) {
-            items = Object.values(resultsContainer).flat().filter(x => x && typeof x === 'object');
-          }
-        }
+        const totalHeader = res.headers.get('X-Total-Count');
+        if (totalHeader) setTotalCount(parseInt(totalHeader, 10));
+        const data = await res.json();
+        const items = Array.isArray(data) ? data : (data.results || data.data?.results || []);
         setSearchResults(items);
-        const total = json.total || json.data?.total || items.length;
-        setTotalCount(total);
+        if (data.total) setTotalCount(data.total);
       } catch (err) {
         console.error("Error fetching search results:", err);
         setSearchResults([]);
