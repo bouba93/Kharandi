@@ -4,6 +4,7 @@ import { Search, Award, Download, ExternalLink, GraduationCap, Building2, MapPin
 import { getResults } from '../../services/content';
 import { EduLoading } from './EduLoading';
 import { toast } from 'sonner';
+import { fetchWithAuth, BASE_URL } from '../../config/api';
 
 export const Results: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState('TOUS');
@@ -53,7 +54,7 @@ export const Results: React.FC = () => {
         const totalHeader = res.headers.get('X-Total-Count');
         if (totalHeader) setTotalCount(parseInt(totalHeader, 10));
         const data = await res.json();
-        const items = Array.isArray(data) ? data : (data.results || []);
+        const items = Array.isArray(data) ? data : (data.results || data.data?.results || []);
         setSearchResults(items);
         if (data.total) setTotalCount(data.total);
       } catch (err) {

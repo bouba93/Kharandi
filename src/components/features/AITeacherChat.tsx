@@ -276,7 +276,7 @@ export const AITeacherChat: React.FC<AITeacherChatProps> = ({
     toast.info('Historique des discussions effacé');
   };
 
-  const callAIStream = async (userDisplayQuestion: string, fullPromptToSend: string, currentMessages: Message[]) => {
+  const callAIStream = async (userQuestion: string, currentMessages: Message[]) => {
     setIsLoading(true);
 
     const aiMsgId = (Date.now() + 1).toString();
@@ -294,14 +294,23 @@ export const AITeacherChat: React.FC<AITeacherChatProps> = ({
 
       abortRef.current = new AbortController();
 
+      const payload: any = {
+        message: userQuestion,
+        history,
+      };
+
+      if (currentSubject) {
+        if (currentSubject.id) payload.subject_id = currentSubject.id;
+        if (currentSubject.content) {
+          payload.subject_context = `[SUJET: ${currentSubject.title}]\n${currentSubject.content}`;
+        }
+      }
+
       const response = await fetchWithAuth(
         '/ai/ask/stream/',
         {
           method:  'POST',
-          body:   JSON.stringify({ 
-            message: fullPromptToSend, 
-            history 
-          }),
+          body:   JSON.stringify(payload),
           signal: abortRef.current.signal,
         }
       );
@@ -364,7 +373,12 @@ export const AITeacherChat: React.FC<AITeacherChatProps> = ({
         const history = currentMessages
           .filter(m => m.id !== '1' && !m.streaming && m.id !== currentMessages[currentMessages.length - 1]?.id)
           .map(m => ({ role: m.role === 'model' ? 'assistant' : 'user', content: m.content })) as any;
-        const reply = await askAI(fullPromptToSend, history);
+        const reply = await askAI(
+          userQuestion,
+          history,
+          currentSubject?.content ? `[SUJET: ${currentSubject.title}]\n${currentSubject.content}` : undefined,
+          currentSubject?.id
+        );
         setMessages(prev => prev.map(m =>
           m.id === aiMsgId
             ? { ...m, content: reply || "Désolé, je n'ai pas pu répondre.", streaming: false }
@@ -393,15 +407,12 @@ export const AITeacherChat: React.FC<AITeacherChatProps> = ({
       localStorage.setItem('guest_ai_requests', String(n + 1));
     }
 
-    // Prepare full enriched prompt with subject content for AI backend
-    const fullPrompt = buildKaramoPrompt(text, currentSubject);
-
     // Clean user message for visual display in UI
     const userMsg: Message = { id: Date.now().toString(), role: 'user', content: text };
     const updated = [...messages, userMsg];
     setMessages(updated);
     setInput('');
-    await callAIStream(text, fullPrompt, updated);
+    await callAIStream(text, updated);
   };
 
   useEffect(() => {
@@ -422,11 +433,6 @@ export const AITeacherChat: React.FC<AITeacherChatProps> = ({
       displayQuestion = 'Peux-tu m\'expliquer ce sujet pas à pas ?';
     }
 
-    // Build the full prompt with active subject if available
-    const fullPrompt = cleanPrompt.includes('CONTENU INTÉGRAL DU SUJET') 
-      ? cleanPrompt 
-      : buildKaramoPrompt(cleanPrompt, currentSubject);
-
     const userMsg: Message = {
       id: Date.now().toString(),
       role: 'user',
@@ -444,7 +450,7 @@ export const AITeacherChat: React.FC<AITeacherChatProps> = ({
       userMsg,
     ];
     setMessages(init);
-    setTimeout(() => callAIStream(displayQuestion, fullPrompt, init), 250);
+    setTimeout(() => callAIStream(displayQuestion, init), 250);
   }, [initialMessage]); // eslint-disable-line
 
   useEffect(() => () => { abortRef.current?.abort(); }, []);

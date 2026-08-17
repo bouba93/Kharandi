@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Search, GraduationCap, Building2, MapPin, Award, Smartphone, Facebook, Twitter, Link, Check, ArrowLeft, Newspaper, HelpCircle, FileSpreadsheet, Download, ExternalLink, Eye, EyeOff, FileText, BookOpen } from 'lucide-react';
 import { EduLoading } from './EduLoading';
 import { KharandiIcon } from '../icons/KharandiIcon';
+import { fetchWithAuth, BASE_URL } from '../../config/api';
 
 export const StandaloneResultsReader: React.FC = () => {
   const [copied, setCopied] = useState(false);
@@ -104,7 +105,7 @@ export const StandaloneResultsReader: React.FC = () => {
         const totalHeader = res.headers.get('X-Total-Count');
         if (totalHeader) setTotalCount(parseInt(totalHeader, 10));
         const data = await res.json();
-        const items = Array.isArray(data) ? data : (data.results || []);
+        const items = Array.isArray(data) ? data : (data.results || data.data?.results || []);
         setExamResults(items);
         if (data.total) setTotalCount(data.total);
       } catch (err) {

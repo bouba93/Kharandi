@@ -6,9 +6,14 @@ import { api } from "../config/api";
 // ─── Chat texte ────────────────────────────────────────────────────────────
 export async function askAI(
   message: string,
-  history: { role: "user" | "assistant"; content: string }[] = []
+  history: { role: "user" | "assistant"; content: string }[] = [],
+  subjectContext?: string,
+  subjectId?: string
 ) {
-  const { data } = await api.post("/ai/ask/", { message, history });
+  const payload: any = { message, history };
+  if (subjectContext) payload.subject_context = subjectContext;
+  if (subjectId) payload.subject_id = subjectId;
+  const { data } = await api.post("/ai/ask/", payload);
   return data?.data || data;
 }
 
