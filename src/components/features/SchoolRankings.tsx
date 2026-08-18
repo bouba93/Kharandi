@@ -268,18 +268,6 @@ export const SchoolRankings: React.FC = () => {
                   <><CreditCard size={18} /> Débloquer le Palmarès (250 000 GNF / an)</>
                 )}
               </button>
-
-              <button
-                onClick={() => {
-                  localStorage.setItem('kharandi_palmares_unlocked', 'true');
-                  setUnlocked(true);
-                  toast.success("Pass Palmarès activé en mode démo (250 000 GNF/an) !");
-                }}
-                className="w-full sm:w-auto px-5 py-4 bg-white/10 hover:bg-white/20 text-white rounded-2xl font-extrabold text-xs transition-colors border border-white/20 flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <Sparkles size={16} className="text-amber-400" />
-                <span>Tester l'accès (Mode Démo)</span>
-              </button>
             </div>
           </div>
         ) : loading ? (

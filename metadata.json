@@ -1,6 +1,6 @@
 {
   "name": "Kharandi",
-  "description": "Kharandi - Plateforme éducative guinéenne d'excellence : cours, sujets et traités d'examens, calcul mental boulier soroban, répétiteurs certifiés, actualités scolaires et bourses d'études.",
+  "description": "La plateforme éducative intelligente au service de la réussite de chaque élève",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

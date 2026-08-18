@@ -28,10 +28,6 @@ export const Results: React.FC = () => {
 
   // Handle Search across all exam categories (auto-loads when empty query)
   useEffect(() => {
-    if (searchQuery.trim().length === 1) {
-      return;
-    }
-
     const timer = setTimeout(async () => {
       setSearchLoading(true);
       let examParam = 'all';

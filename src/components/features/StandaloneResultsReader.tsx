@@ -84,10 +84,6 @@ export const StandaloneResultsReader: React.FC = () => {
 
   // Handle Search across exam categories
   useEffect(() => {
-    if (searchQuery.trim().length === 1) {
-      return;
-    }
-
     const doFetch = async () => {
       setLoading(true);
       const examParam = activeExamTab === 'ALL' ? 'all' : activeExamTab.toLowerCase();
