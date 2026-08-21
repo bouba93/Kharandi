@@ -2,7 +2,7 @@
   "name": "Kharandi - Ton Camarade Scolaire",
   "short_name": "Kharandi",
   "id": "com.kharandi.app",
-  "description": "Plateforme éducative de référence en Guinée. Accédez facilement à vos cours, exercices, résultats d'examens, bourses d'études et au Kharandi Makiti (Marketplace).",
+  "description": "La plateforme éducative intelligente au service de la réussite de chaque élève",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
