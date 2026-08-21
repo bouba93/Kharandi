@@ -162,7 +162,6 @@ export const Dashboard: React.FC = () => {
     const freeFeatures = [
       'Accueil', 
       'Sujets et traités',
-      'Calcul mental',
       'Kharandi Makiti', 
       'Abonnements', 
       'Dashboard utilisateur', 
@@ -258,7 +257,7 @@ export const Dashboard: React.FC = () => {
   const navItems: Array<{ id: string; icon: any; kIcon: KharandiIconName; roles?: string[]; premium?: boolean; badge?: boolean }> = [
     { id: 'Accueil', icon: Home, kIcon: 'accueil' as KharandiIconName },
     { id: 'Sujets et traités', icon: BookOpen, kIcon: 'cours' as KharandiIconName, roles: ['student', 'eleve', 'parent', 'admin', 'teacher', 'repetiteur'] },
-    { id: 'Calcul mental', icon: Brain, kIcon: 'abacus' as KharandiIconName, roles: ['student', 'eleve', 'parent', 'admin', 'teacher', 'repetiteur'] },
+    { id: 'Calcul mental', icon: Brain, kIcon: 'abacus' as KharandiIconName, premium: true, roles: ['student', 'eleve', 'parent', 'admin', 'teacher', 'repetiteur'] },
     { id: 'Exo Gagnant', icon: PenTool, kIcon: 'exercices' as KharandiIconName, roles: ['student', 'eleve', 'admin'] },
     { id: 'Mon Wallet', icon: WalletIcon, kIcon: 'portefeuille' as KharandiIconName, roles: ['student', 'eleve', 'parent', 'admin', 'teacher', 'repetiteur', 'seller'] },
     { id: 'Répétiteurs', icon: Users, kIcon: 'enseignant' as KharandiIconName, premium: true, roles: ['student', 'eleve', 'parent', 'admin'] },
