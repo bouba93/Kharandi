@@ -75,6 +75,7 @@ export const Login: React.FC = () => {
   const [error,         setError]         = useState<string|null>(null);
   const [bannerIdx,     setBannerIdx]     = useState(0);
   const [hasAccount,    setHasAccount]    = useState<boolean|null>(null);
+  const [showGuestRoleModal, setShowGuestRoleModal] = useState(false);
 
   const banners = [
     "https://lh3.googleusercontent.com/d/1IUjSHliHKUAS9Thn4jtRV_pUwgARgkz3",
@@ -507,6 +508,15 @@ export const Login: React.FC = () => {
                   </svg>
                   <span>Continuer avec Google</span>
                 </a>
+
+                <button
+                  type="button"
+                  onClick={() => setShowGuestRoleModal(true)}
+                  className="w-full py-3.5 px-4 rounded-[20px] font-bold text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/80 shadow-xs flex items-center justify-center gap-2 transition-all cursor-pointer mt-2"
+                >
+                  <Users size={18} className="text-slate-500" />
+                  <span>Explorer en mode invité (Choisir le rôle)</span>
+                </button>
               </motion.div>
             )}
 
@@ -751,6 +761,47 @@ export const Login: React.FC = () => {
           Besoin d'aide ? Contactez le support Kharandi au <span className="text-[#18bfd6]">+224 626 18 71 17</span>
         </p>
       </div>
+
+      {showGuestRoleModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white rounded-[24px] p-6 max-w-md w-full shadow-2xl border border-slate-100">
+            <h3 className="text-lg font-black text-slate-900 mb-1">Choisissez votre profil invité</h3>
+            <p className="text-xs text-slate-500 mb-5">Sélectionnez le rôle avec lequel vous souhaitez explorer l'application Kharandi :</p>
+            
+            <div className="space-y-2.5 mb-6">
+              {[
+                { id: 'student', label: '🎓 Élève / Étudiant', desc: 'Examens CEE, BEPC, BAC, Abacus & Cours' },
+                { id: 'repetiteur', label: '📚 Enseignant / Répétiteur', desc: 'Gestion des cours, étudiants & suivi' },
+                { id: 'parent', label: '👨‍👩‍👧 Parent d’élève', desc: 'Suivi des enfants, bulletins & tuteurs' },
+                { id: 'seller', label: '🛍️ Vendeur / Librairie', desc: 'Boutique Kharandi Makiti & produits' },
+                { id: 'admin', label: '🛡️ Administrateur', desc: 'Gestion globale & modération' },
+              ].map(r => (
+                <button
+                  key={r.id}
+                  onClick={() => {
+                    setGuestMode(true, r.id);
+                    window.location.href = '/';
+                  }}
+                  className="w-full text-left p-3.5 rounded-xl border border-slate-200 hover:border-[#18bfd6] hover:bg-[#18bfd6]/5 transition-all flex items-center justify-between group cursor-pointer"
+                >
+                  <div>
+                    <p className="font-extrabold text-sm text-slate-900 group-hover:text-[#18bfd6]">{r.label}</p>
+                    <p className="text-[11px] text-slate-500">{r.desc}</p>
+                  </div>
+                  <span className="text-xs font-bold px-3 py-1.5 rounded-lg bg-slate-100 group-hover:bg-[#18bfd6] group-hover:text-white transition-colors">Entrer →</span>
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={() => setShowGuestRoleModal(false)}
+              className="w-full py-3 rounded-xl font-bold text-xs text-slate-500 hover:bg-slate-100 transition-colors cursor-pointer"
+            >
+              Annuler
+            </button>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };

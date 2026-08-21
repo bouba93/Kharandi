@@ -66,9 +66,8 @@ export const Dashboard: React.FC = () => {
   const location = useLocation();
   const currentPath = location.pathname;
   const { userProfile, isGuest, setGuestMode, logout } = useAuth();
-  const [guestRole, setGuestRole] = useState<'student' | 'teacher' | 'parent' | 'seller' | 'admin'>('student');
-  const role = isGuest ? guestRole : (userProfile?.role || 'student');
-  const subscriptionPlan = isGuest ? 'annuel' : (userProfile?.subscriptionPlan || 'free');
+  const role = userProfile?.role || 'student';
+  const subscriptionPlan = userProfile?.subscriptionPlan || 'free';
 
   const { show: showOnboardingTutorial, close: closeOnboardingTutorial } = useOnboarding(role);
 
@@ -154,7 +153,11 @@ export const Dashboard: React.FC = () => {
   };
 
   const isFeatureAllowed = (tab: string) => {
-    if (isGuest || role === 'admin') return true;
+    if (role === 'admin') return true;
+    if (isGuest) {
+      if (['Messages', 'Notifs', 'Support', 'Abonnements', 'Kharandi École', 'Exo Gagnant'].includes(tab)) return false;
+      return true;
+    }
     
     if (role === 'seller' && subscriptionPlan === 'free') {
        return tab === 'Abonnements' || tab === 'Dashboard utilisateur' || tab === 'Support';
@@ -274,6 +277,7 @@ export const Dashboard: React.FC = () => {
     { id: 'Support', icon: MessageSquare, kIcon: 'aide' as KharandiIconName },
     { id: 'Dashboard utilisateur', icon: User, kIcon: 'profil' as KharandiIconName }
   ].filter(item => {
+    if (isGuest && ['Messages', 'Notifs', 'Support', 'Abonnements', 'Kharandi École', 'Exo Gagnant'].includes(item.id)) return false;
     if (isGuest) return true;
     
     // Si c'est une fonctionnalité premium et que l'utilisateur est sur le forfait gratuit
@@ -299,7 +303,7 @@ export const Dashboard: React.FC = () => {
     !mobileNavItems.find(mi => mi.id === item.id)
   );
 
-  if (role === 'admin' || isGuest) {
+  if (role === 'admin' && !isGuest) {
     if (!navItems.some(i => i.id === 'Administration')) {
       navItems.push({ id: 'Administration', icon: Shield, kIcon: 'tableau_de_bord', badge: false });
     }
@@ -325,13 +329,10 @@ export const Dashboard: React.FC = () => {
       {/* Background decorative elements */}
       <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
       
-      {/* Desktop/Tablet Sidebar - Manga & Geometric Comic Design */}
-      <aside className="hidden md:flex flex-col w-64 border-r-4 border-slate-950 bg-[#FFFDF9] bg-[radial-gradient(#cbd5e1_1.5px,transparent_1.5px)] [background-size:16px_16px] z-30 sticky top-0 h-screen shadow-[6px_0px_0px_#0f172a]">
-        <div className="p-6 flex flex-col items-center gap-3 relative">
-          <div className="absolute top-3 right-4 bg-yellow-300 border-2 border-slate-950 font-black text-[10px] px-2 py-0.5 rounded-full rotate-[-4deg] shadow-[2px_2px_0px_#0f172a]">
-            ⚡ MANGA v2
-          </div>
-          <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center overflow-hidden border-2 border-slate-950 shadow-[3px_3px_0px_#0f172a] transition-transform hover:scale-105">
+      {/* Desktop/Tablet Sidebar */}
+      <aside className="hidden md:flex flex-col w-64 glass-sidebar z-30 sticky top-0 h-screen">
+        <div className="p-6 flex flex-col items-center gap-3">
+          <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center overflow-hidden border border-gray-100 shadow-sm transition-transform hover:scale-105">
             <img 
               src="https://lh3.googleusercontent.com/d/1NnKKOKkq_li7F4_dNgGBVUXHR_K2xL55" 
               alt="Kharandi Logo" 
@@ -341,48 +342,24 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
         
-        <div className="px-6 py-3 mx-4 mb-3 border-2 border-slate-950 rounded-2xl bg-white shadow-[3px_3px_0px_#0f172a]">
-          <p className="font-black text-slate-900 truncate text-sm">
+        <div className="px-6 py-4 border-b border-gray-50 mb-2">
+          <p className="font-extrabold text-text-main truncate">
             {isGuest ? 'Mode Invité' : (userProfile?.name && userProfile.name !== 'Utilisateur' 
               ? userProfile.name 
               : (userProfile?.email?.split('@')[0] || 'Utilisateur'))}
           </p>
           <div className="flex items-center justify-between mt-1">
-            <span className="font-black text-[10px] uppercase text-slate-900 bg-secondary px-2 py-0.5 rounded-md border border-slate-950 inline-block shadow-[1px_1px_0px_#0f172a]">{displayRole}</span>
+            <span className="font-medium text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-md inline-block">{displayRole}</span>
             <button 
               onClick={() => setActiveTab('Dashboard utilisateur')}
-              className="flex items-center gap-1 text-xs font-black text-white bg-primary hover:bg-primary/90 px-2.5 py-0.5 rounded-md border-2 border-slate-950 cursor-pointer transition-all active:scale-95 shadow-[2px_2px_0px_#0f172a]"
+              className="flex items-center gap-1 text-xs font-bold text-accent bg-accent/10 hover:bg-accent/20 px-2 py-0.5 rounded-md border border-accent/20 cursor-pointer transition-all active:scale-95"
             >
               <Award size={12} /> {userProfile?.points || 0} pts
             </button>
           </div>
         </div>
-
-        {isGuest && (
-          <div className="px-4 py-2 mx-4 mb-2 bg-yellow-100 border-2 border-slate-950 rounded-xl shadow-[3px_3px_0px_#0f172a]">
-            <p className="text-[10px] font-black text-slate-900 mb-1.5 uppercase">🧪 Rôle actif (Screenshot) :</p>
-            <div className="grid grid-cols-2 gap-1">
-              {(['student', 'teacher', 'parent', 'seller', 'admin'] as const).map((r) => (
-                <button
-                  key={r}
-                  onClick={() => {
-                    setGuestRole(r);
-                    if (r === 'admin') setActiveTab('Administration');
-                    else if (r === 'seller') setActiveTab('Kharandi Makiti');
-                    else setActiveTab('Accueil');
-                  }}
-                  className={`px-2 py-1 text-[10px] font-black rounded border border-slate-950 transition-all ${
-                    guestRole === r ? 'bg-slate-950 text-white shadow-[1px_1px_0px_#0f172a]' : 'bg-white text-slate-700 hover:bg-slate-50'
-                  }`}
-                >
-                  {r === 'student' ? 'Élève' : r === 'teacher' ? 'Prof' : r === 'parent' ? 'Parent' : r === 'seller' ? 'Vendeur' : 'Admin'}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
         
-        <nav className="flex-1 px-4 py-2 space-y-2 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300">
+        <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200">
           {navItems.map(item => {
             const isActive = activeTab === item.id;
             const isLocked = !isFeatureAllowed(item.id);
@@ -390,49 +367,55 @@ export const Dashboard: React.FC = () => {
               <button 
                 key={item.id} 
                 onClick={() => setActiveTab(item.id)}
-                className={`flex items-center gap-3 w-full px-3.5 py-3 rounded-xl transition-all duration-200 relative border-2 ${
-                  isActive 
-                    ? 'bg-yellow-300 text-slate-950 border-slate-950 shadow-[4px_4px_0px_#0f172a] translate-x-1 font-black' 
-                    : 'bg-white text-slate-700 border-slate-200 hover:border-slate-950 hover:shadow-[2px_2px_0px_#0f172a] font-bold'
+                className={`flex items-center gap-4 w-full px-4 py-3.5 rounded-2xl transition-all duration-300 relative ${
+                  isActive ? 'bg-primary text-white shadow-md' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
                 }`}
               >
                 <div className="relative z-10 flex items-center justify-center">
                   {item.kIcon ? (
                     <KharandiIcon 
                       name={item.kIcon} 
-                      size={24} 
+                      size={26} 
                       showBackground={false} 
                       showBookmark={false} 
-                      primaryColor={isActive ? '#0f172a' : '#475569'} 
+                      primaryColor={isActive ? '#FFFFFF' : '#163B45'} 
                     />
                   ) : (
                     <item.icon 
-                      size={20} 
+                      size={22} 
                       strokeWidth={isActive ? 2.5 : 2}
+                      fill={isActive ? 'currentColor' : 'none'}
                     />
                   )}
                   {item.badge && !isActive && (
-                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-slate-950 animate-pulse" />
+                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#C0392B] rounded-full border-2 border-white" />
                   )}
                 </div>
-                <span className="text-xs z-10 flex-1 text-left tracking-tight truncate">
+                <span className={`text-[15px] z-10 flex-1 text-left ${isActive ? 'font-bold' : 'font-medium'}`}>
                   {item.id}
                 </span>
                 {isLocked && (
-                  <Lock size={13} className="z-10 text-slate-400" />
+                  <Lock size={14} className={`z-10 ${isActive ? 'text-white/70' : 'text-slate-300'}`} />
+                )}
+                {isActive && (
+                  <motion.div 
+                    layoutId="sidebar-pill" 
+                    className="absolute inset-0 bg-primary rounded-2xl"
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  />
                 )}
               </button>
             );
           })}
         </nav>
 
-        <div className="p-4 border-t-2 border-slate-950 bg-white/80">
+        <div className="p-4 border-t border-gray-50">
           <button 
             onClick={handleLogout}
-            className="flex items-center gap-3 w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl border-2 border-slate-950 font-black text-xs shadow-[2px_2px_0px_#0f172a] transition-all active:translate-y-0.5"
+            className="flex items-center gap-4 w-full px-4 py-3.5 text-red-500 hover:bg-red-50 rounded-2xl transition-all duration-300"
           >
-            <LogOut size={18} />
-            <span>{isGuest ? 'Quitter invité' : 'Déconnexion'}</span>
+            <LogOut size={22} />
+            <span className="text-[15px] font-bold">{isGuest ? 'Quitter le mode invité' : 'Se déconnecter'}</span>
           </button>
         </div>
       </aside>

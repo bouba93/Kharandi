@@ -16,7 +16,7 @@ interface AuthContextType {
   userProfile: UserProfile | null;
   isAuthReady: boolean;
   isGuest: boolean;
-  setGuestMode: (isGuest: boolean) => void;
+  setGuestMode: (isGuest: boolean, role?: string) => void;
   logout: () => void;
   refreshProfile: () => Promise<void>;
 }
@@ -74,12 +74,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [isGuest,     setIsGuest]     = useState(false);
 
-  const setGuestMode = (guest: boolean) => {
+  const setGuestMode = (guest: boolean, role: string = 'student') => {
     setIsGuest(guest);
     if (guest) {
       localStorage.setItem('isGuest', 'true');
+      localStorage.setItem('kharandi_guest_role', role);
     } else {
       localStorage.removeItem('isGuest');
+      localStorage.removeItem('kharandi_guest_role');
     }
   };
 
@@ -88,6 +90,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUserProfile(null);
     setIsGuest(false);
     localStorage.removeItem('isGuest');
+    localStorage.removeItem('kharandi_guest_role');
     localStorage.removeItem('kharandi_cached_profile');
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
@@ -99,15 +102,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const token = localStorage.getItem('access_token');
     if (!token) {
       if (localStorage.getItem('isGuest') === 'true') {
+        const guestRole = localStorage.getItem('kharandi_guest_role') || 'student';
         setUserProfile({
           uid: 'guest',
           email: 'guest@kharandi.com',
-          role: 'student',
-          name: 'Invité',
+          role: guestRole,
+          name: `Invité (${guestRole === 'student' ? 'Élève' : guestRole === 'repetiteur' || guestRole === 'teacher' ? 'Enseignant' : guestRole === 'parent' ? 'Parent' : guestRole === 'seller' ? 'Vendeur' : 'Admin'})`,
           interests: [],
           onboardingCompleted: true,
           isApproved: true,
-          points: 100,
+          points: 150,
           subscriptionPlan: 'annuel',
           activeAddons: ['all']
         });
