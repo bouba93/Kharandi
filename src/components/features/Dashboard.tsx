@@ -100,6 +100,58 @@ export const Dashboard: React.FC = () => {
     }
   }, [currentPath, role, subscriptionPlan, navigate]);
 
+  useEffect(() => {
+    const roleThemeStyles = {
+      student: {
+        primary: '#18bfd6',
+        secondary: '#fcb303',
+        accent: '#fcb303',
+      },
+      eleve: {
+        primary: '#18bfd6',
+        secondary: '#fcb303',
+        accent: '#fcb303',
+      },
+      teacher: {
+        primary: '#10b981',
+        secondary: '#06b6d4',
+        accent: '#06b6d4',
+      },
+      repetiteur: {
+        primary: '#10b981',
+        secondary: '#06b6d4',
+        accent: '#06b6d4',
+      },
+      parent: {
+        primary: '#8b5cf6',
+        secondary: '#a78bfa',
+        accent: '#a78bfa',
+      },
+      seller: {
+        primary: '#f59e0b',
+        secondary: '#f97316',
+        accent: '#f97316',
+      },
+      admin: {
+        primary: '#ef4444',
+        secondary: '#f87171',
+        accent: '#f87171',
+      }
+    };
+
+    const theme = roleThemeStyles[role as keyof typeof roleThemeStyles] || roleThemeStyles.student;
+    
+    document.documentElement.style.setProperty('--color-primary', theme.primary);
+    document.documentElement.style.setProperty('--color-secondary', theme.secondary);
+    document.documentElement.style.setProperty('--color-accent', theme.accent);
+
+    return () => {
+      document.documentElement.style.removeProperty('--color-primary');
+      document.documentElement.style.removeProperty('--color-secondary');
+      document.documentElement.style.removeProperty('--color-accent');
+    };
+  }, [role]);
+
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const scrollRef = useRef<number>(0);
 
@@ -182,6 +234,9 @@ export const Dashboard: React.FC = () => {
     ];
     
     if (subscriptionPlan === 'free') {
+      if ((role === 'teacher' || role === 'repetiteur' || role === 'tutor') && tab === 'Répétiteurs') {
+        return true;
+      }
       return freeFeatures.includes(tab);
     }
     
@@ -264,7 +319,7 @@ export const Dashboard: React.FC = () => {
     { id: 'Calcul mental', icon: Brain, kIcon: 'abacus' as KharandiIconName, premium: true, roles: ['student', 'eleve', 'parent', 'admin', 'teacher', 'repetiteur'] },
     { id: 'Exo Gagnant', icon: PenTool, kIcon: 'exercices' as KharandiIconName, roles: ['student', 'eleve', 'admin'] },
     { id: 'Mon Wallet', icon: WalletIcon, kIcon: 'portefeuille' as KharandiIconName, roles: ['student', 'eleve', 'parent', 'admin', 'teacher', 'repetiteur', 'seller'] },
-    { id: 'Répétiteurs', icon: Users, kIcon: 'enseignant' as KharandiIconName, premium: true, roles: ['student', 'eleve', 'parent', 'admin'] },
+    { id: 'Répétiteurs', icon: Users, kIcon: 'enseignant' as KharandiIconName, premium: true, roles: ['student', 'eleve', 'parent', 'admin', 'teacher', 'repetiteur', 'tutor'] },
     { id: 'Résultats', icon: Award, kIcon: 'examen' as KharandiIconName, roles: ['student', 'eleve', 'parent', 'admin'] },
     { id: 'Bourses', icon: Briefcase, kIcon: 'bourse' as KharandiIconName, roles: ['student', 'eleve', 'parent', 'admin'] },
     { id: 'Études à l’étranger', icon: Globe, kIcon: 'voyage' as KharandiIconName, roles: ['student', 'eleve', 'parent', 'admin'] },
@@ -440,12 +495,12 @@ export const Dashboard: React.FC = () => {
           <div className="px-6 pt-6 md:px-8 pb-2 flex items-center justify-between">
             <button
               onClick={() => setActiveTab('Accueil')}
-              className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-slate-500 hover:text-[#18bfd6] transition-all group shrink-0 cursor-pointer"
+              className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-slate-500 hover:text-primary transition-all group shrink-0 cursor-pointer"
             >
-              <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform text-[#18bfd6]" />
+              <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform text-primary" />
               Retour à l'accueil
             </button>
-            <h2 className="text-[10px] font-black uppercase tracking-widest text-[#fcb303] bg-[#fcb303]/10 px-3 py-1 rounded-full border border-[#fcb303]/20">{activeTab}</h2>
+            <h2 className="text-[10px] font-black uppercase tracking-widest text-secondary bg-secondary/10 px-3 py-1 rounded-full border border-secondary/20">{activeTab}</h2>
           </div>
         )}
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '../ui/Button';
-import { Phone, Lock, Eye, EyeOff, AlertCircle, Loader2, Backpack, Pencil, PenTool, Ruler, GraduationCap, BookOpen, CheckCircle2, ArrowLeft, MessageCircle, Mail, ExternalLink, Sparkles, Users, Store, UserCheck } from 'lucide-react';
+import { Phone, Lock, Eye, EyeOff, AlertCircle, Loader2, Backpack, Pencil, PenTool, Ruler, GraduationCap, BookOpen, CheckCircle2, ArrowLeft, MessageCircle, Mail, ExternalLink, Sparkles, Users, Store, UserCheck, Upload, Trash2, ShieldAlert } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '../../config/api';
 import { useAuth } from '../../contexts/AuthContext';
@@ -9,7 +9,7 @@ import { updateProfile } from '../../services/auth';
 
 const ADMIN_PHONE = '+224627382173';
 
-type Step = 'phone' | 'otp' | 'password' | 'role' | 'new_password' | 'reset_otp' | 'reset_new';
+type Step = 'phone' | 'otp' | 'password' | 'role' | 'kyc' | 'new_password' | 'reset_otp' | 'reset_new';
 type Mode = 'login' | 'register';
 
 interface RoleOption {
@@ -33,20 +33,11 @@ const REGISTER_ROLES: RoleOption[] = [
     accentColor: '#18bfd6',
   },
   {
-    id: 'parent',
-    backendRole: 'PARENT',
-    label: 'Parent d\'élève',
-    badge: 'Suivi Scolaire',
-    desc: 'Suivez la progression, consultez les bulletins et accompagnez la réussite de vos enfants.',
-    icon: Users,
-    accentColor: '#fcb303',
-  },
-  {
     id: 'repetiteur',
     backendRole: 'TUTOR',
-    label: 'Répétiteur / Enseignant',
-    badge: 'Soutien & Cours',
-    desc: 'Proposez vos cours particuliers, fixez vos matières et recevez des demandes de parents.',
+    label: 'Répétiteur de maison',
+    badge: 'Cours particuliers',
+    desc: 'Soutien scolaire à domicile, suivi des heures de cours dispensées et rapports de séances hebdomadaires.',
     icon: UserCheck,
     accentColor: '#10b981',
   },
@@ -68,6 +59,8 @@ export const Login: React.FC = () => {
   const [phone,         setPhone]         = useState('');
   const [otpCode,       setOtpCode]       = useState('');
   const [selectedRole,  setSelectedRole]  = useState<string>('student');
+  const [kycRecto,      setKycRecto]      = useState<string | null>(null);
+  const [kycVerso,      setKycVerso]      = useState<string | null>(null);
   const [password,      setPassword]      = useState('');
   const [newPassword,   setNewPassword]   = useState('');
   const [showPwd,       setShowPwd]       = useState(false);
@@ -75,7 +68,6 @@ export const Login: React.FC = () => {
   const [error,         setError]         = useState<string|null>(null);
   const [bannerIdx,     setBannerIdx]     = useState(0);
   const [hasAccount,    setHasAccount]    = useState<boolean|null>(null);
-  const [showGuestRoleModal, setShowGuestRoleModal] = useState(false);
 
   const banners = [
     "https://lh3.googleusercontent.com/d/1IUjSHliHKUAS9Thn4jtRV_pUwgARgkz3",
@@ -202,9 +194,13 @@ export const Login: React.FC = () => {
       sessionStorage.setItem('onboarding_step', '1'); // Aller directement aux informations de profil
 
       try {
-        await updateProfile({
+        const payload: any = {
           role: selectedRoleObj.backendRole,
-        });
+        };
+        if (selectedRole === 'repetiteur' && kycRecto && kycVerso) {
+          payload.kyc_document = JSON.stringify({ recto: kycRecto, verso: kycVerso });
+        }
+        await updateProfile(payload);
       } catch {}
 
       toast.success('Compte créé ! Bienvenue sur Kharandi 🎉');
@@ -245,7 +241,21 @@ export const Login: React.FC = () => {
     if (step === 'phone')         handlePhone();
     else if (step === 'password')     handlePassword();
     else if (step === 'otp')          handleOTP();
-    else if (step === 'role')         setStep('new_password');
+    else if (step === 'role') {
+      if (selectedRole === 'repetiteur') {
+        setStep('kyc');
+      } else {
+        setStep('new_password');
+      }
+    }
+    else if (step === 'kyc') {
+      if (!kycRecto || !kycVerso) {
+        setError("La copie recto et verso de votre pièce d'identité est obligatoire pour s'inscrire comme répétiteur.");
+        return;
+      }
+      setError(null);
+      setStep('new_password');
+    }
     else if (step === 'new_password') handleNewPassword();
     else if (step === 'reset_otp')    step === 'reset_otp' && otpCode ? setStep('reset_new') : null;
     else if (step === 'reset_new')    handleResetConfirm();
@@ -255,7 +265,27 @@ export const Login: React.FC = () => {
     setMode(m); setStep('phone'); setError(null);
     setOtpCode(''); setPassword(''); setNewPassword('');
     setSelectedRole('student');
+    setKycRecto(null); setKycVerso(null);
     setHasAccount(null);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, side: 'recto' | 'verso') => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Le fichier ne doit pas dépasser 5 Mo.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (side === 'recto') {
+          setKycRecto(reader.result as string);
+        } else {
+          setKycVerso(reader.result as string);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const FloatingIcon = ({ icon: Icon, color, delay, top, left, rotate }: any) => (
@@ -272,6 +302,7 @@ export const Login: React.FC = () => {
     password:     'Entrez votre mot de passe',
     otp:          mode === 'login' ? 'Vérification' : 'Confirmez votre numéro',
     role:         'Choisissez votre rôle',
+    kyc:          'Pièce d’identité obligatoire',
     new_password: 'Créez votre mot de passe',
     reset_otp:    'Code de réinitialisation',
     reset_new:    'Nouveau mot de passe',
@@ -282,6 +313,7 @@ export const Login: React.FC = () => {
     password:     fmt(),
     otp:          `Code SMS envoyé au ${fmt()}`,
     role:         'Sélectionnez votre type de profil pour une expérience sur mesure',
+    kyc:          'La copie recto et verso de votre pièce d\'identité est obligatoire pour pouvoir proposer des cours à domicile.',
     new_password: 'Ce mot de passe sécurisera votre compte sur cet appareil',
     reset_otp:    `Code envoyé au ${fmt()}`,
     reset_new:    'Choisissez un nouveau mot de passe sécurisé',
@@ -509,14 +541,7 @@ export const Login: React.FC = () => {
                   <span>Continuer avec Google</span>
                 </a>
 
-                <button
-                  type="button"
-                  onClick={() => setShowGuestRoleModal(true)}
-                  className="w-full py-3.5 px-4 rounded-[20px] font-bold text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/80 shadow-xs flex items-center justify-center gap-2 transition-all cursor-pointer mt-2"
-                >
-                  <Users size={18} className="text-slate-500" />
-                  <span>Explorer en mode invité (Choisir le rôle)</span>
-                </button>
+
               </motion.div>
             )}
 
@@ -646,7 +671,95 @@ export const Login: React.FC = () => {
                     ← Modifier le numéro
                   </button>
                   <span className="text-[10px] font-bold text-slate-400">
-                    Étape 2 sur 3
+                    Étape 2 sur 4
+                  </span>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Step : KYC Upload (Mandatory for Répétiteurs) */}
+            {step === 'kyc' && (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 text-left">
+                <div className="bg-amber-50 border border-amber-200 text-amber-800 p-3.5 rounded-2xl text-[11px] font-bold flex gap-2.5 leading-relaxed">
+                  <ShieldAlert size={18} className="shrink-0 text-amber-600 mt-0.5" />
+                  <div>
+                    <p className="font-extrabold uppercase mb-0.5">Vérification de sécurité</p>
+                    <p>Pour la sécurité des familles, la copie recto et verso de votre pièce d'identité (CNI, Passeport ou Permis) est requise pour s'inscrire en tant que répétiteur.</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  {/* RECTO */}
+                  <div className="space-y-1.5">
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider block">1. Face Avant (Recto) *</span>
+                    {kycRecto ? (
+                      <div className="relative rounded-2xl border border-slate-200 overflow-hidden bg-slate-50 aspect-video flex items-center justify-center">
+                        <img src={kycRecto} alt="Recto Piece" className="w-full h-full object-cover" />
+                        <button 
+                          type="button" 
+                          onClick={() => setKycRecto(null)}
+                          className="absolute top-2 right-2 p-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors cursor-pointer"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="border-2 border-dashed border-slate-200 hover:border-primary/50 transition-colors rounded-2xl p-4 flex flex-col items-center justify-center text-center aspect-video cursor-pointer bg-slate-50/50 hover:bg-slate-50">
+                        <Upload size={20} className="text-slate-400 mb-1" />
+                        <span className="text-xs font-bold text-slate-700">Téléverser le Recto</span>
+                        <span className="text-[9px] text-slate-400 font-medium">PNG, JPG jusqu'à 5 Mo</span>
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          required 
+                          onChange={(e) => handleFileChange(e, 'recto')} 
+                          className="hidden" 
+                        />
+                      </label>
+                    )}
+                  </div>
+
+                  {/* VERSO */}
+                  <div className="space-y-1.5">
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider block">2. Face Arrière (Verso) *</span>
+                    {kycVerso ? (
+                      <div className="relative rounded-2xl border border-slate-200 overflow-hidden bg-slate-50 aspect-video flex items-center justify-center">
+                        <img src={kycVerso} alt="Verso Piece" className="w-full h-full object-cover" />
+                        <button 
+                          type="button" 
+                          onClick={() => setKycVerso(null)}
+                          className="absolute top-2 right-2 p-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors cursor-pointer"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="border-2 border-dashed border-slate-200 hover:border-primary/50 transition-colors rounded-2xl p-4 flex flex-col items-center justify-center text-center aspect-video cursor-pointer bg-slate-50/50 hover:bg-slate-50">
+                        <Upload size={20} className="text-slate-400 mb-1" />
+                        <span className="text-xs font-bold text-slate-700">Téléverser le Verso</span>
+                        <span className="text-[9px] text-slate-400 font-medium">PNG, JPG jusqu'à 5 Mo</span>
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          required 
+                          onChange={(e) => handleFileChange(e, 'verso')} 
+                          className="hidden" 
+                        />
+                      </label>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center px-1 pt-1">
+                  <button 
+                    type="button" 
+                    onClick={() => { setStep('role'); }}
+                    className="text-[10px] font-black uppercase text-slate-400 hover:text-[#18bfd6] transition-colors cursor-pointer"
+                  >
+                    ← Modifier le rôle
+                  </button>
+                  <span className="text-[10px] font-bold text-slate-400">
+                    Étape 3 sur 4
                   </span>
                 </div>
               </motion.div>
@@ -714,10 +827,10 @@ export const Login: React.FC = () => {
                   <div className="flex justify-start px-1">
                     <button 
                       type="button" 
-                      onClick={() => setStep('role')}
+                      onClick={() => setStep(selectedRole === 'repetiteur' ? 'kyc' : 'role')}
                       className="text-[10px] font-black uppercase text-slate-400 hover:text-[#18bfd6] transition-colors cursor-pointer"
                     >
-                      ← Retour au choix du rôle
+                      ← Retour à l'étape précédente
                     </button>
                   </div>
                 )}
@@ -737,6 +850,7 @@ export const Login: React.FC = () => {
                 step === 'password'     ? 'Se connecter' :
                 step === 'otp'          ? (mode === 'login' ? 'Confirmer' : 'Suivant') :
                 step === 'role'         ? 'Valider mon profil & Continuer' :
+                step === 'kyc'          ? 'Valider ma pièce d\'identité' :
                 step === 'new_password' ? 'Créer mon compte & Commencer' :
                 step === 'reset_otp'    ? 'Suivant' :
                 'Mettre à jour mon mot de passe'
@@ -761,47 +875,6 @@ export const Login: React.FC = () => {
           Besoin d'aide ? Contactez le support Kharandi au <span className="text-[#18bfd6]">+224 626 18 71 17</span>
         </p>
       </div>
-
-      {showGuestRoleModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white rounded-[24px] p-6 max-w-md w-full shadow-2xl border border-slate-100">
-            <h3 className="text-lg font-black text-slate-900 mb-1">Choisissez votre profil invité</h3>
-            <p className="text-xs text-slate-500 mb-5">Sélectionnez le rôle avec lequel vous souhaitez explorer l'application Kharandi :</p>
-            
-            <div className="space-y-2.5 mb-6">
-              {[
-                { id: 'student', label: '🎓 Élève / Étudiant', desc: 'Examens CEE, BEPC, BAC, Abacus & Cours' },
-                { id: 'repetiteur', label: '📚 Enseignant / Répétiteur', desc: 'Gestion des cours, étudiants & suivi' },
-                { id: 'parent', label: '👨‍👩‍👧 Parent d’élève', desc: 'Suivi des enfants, bulletins & tuteurs' },
-                { id: 'seller', label: '🛍️ Vendeur / Librairie', desc: 'Boutique Kharandi Makiti & produits' },
-                { id: 'admin', label: '🛡️ Administrateur', desc: 'Gestion globale & modération' },
-              ].map(r => (
-                <button
-                  key={r.id}
-                  onClick={() => {
-                    setGuestMode(true, r.id);
-                    window.location.href = '/';
-                  }}
-                  className="w-full text-left p-3.5 rounded-xl border border-slate-200 hover:border-[#18bfd6] hover:bg-[#18bfd6]/5 transition-all flex items-center justify-between group cursor-pointer"
-                >
-                  <div>
-                    <p className="font-extrabold text-sm text-slate-900 group-hover:text-[#18bfd6]">{r.label}</p>
-                    <p className="text-[11px] text-slate-500">{r.desc}</p>
-                  </div>
-                  <span className="text-xs font-bold px-3 py-1.5 rounded-lg bg-slate-100 group-hover:bg-[#18bfd6] group-hover:text-white transition-colors">Entrer →</span>
-                </button>
-              ))}
-            </div>
-
-            <button
-              onClick={() => setShowGuestRoleModal(false)}
-              className="w-full py-3 rounded-xl font-bold text-xs text-slate-500 hover:bg-slate-100 transition-colors cursor-pointer"
-            >
-              Annuler
-            </button>
-          </motion.div>
-        </div>
-      )}
     </div>
   );
 };
