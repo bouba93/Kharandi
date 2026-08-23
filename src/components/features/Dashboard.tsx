@@ -491,6 +491,32 @@ export const Dashboard: React.FC = () => {
         }}
         className="flex-1 relative w-full md:w-[calc(100%-16rem)] max-w-7xl mx-auto pb-40 md:pb-8 h-screen overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200"
       >
+        {activeTab !== 'Onboarding' && (
+          <header className="md:hidden flex items-center justify-between px-6 py-3 bg-white/90 backdrop-blur-md border-b border-slate-100 sticky top-0 z-30 shadow-sm">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 bg-white rounded-xl flex items-center justify-center overflow-hidden border border-slate-100 shadow-sm">
+                <img 
+                  src="https://lh3.googleusercontent.com/d/1NnKKOKkq_li7F4_dNgGBVUXHR_K2xL55" 
+                  alt="Kharandi Logo" 
+                  className="w-full h-full object-contain p-1"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+              <span className="font-extrabold text-lg tracking-tight text-slate-800">Kharandi</span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => setActiveTab('Dashboard utilisateur')}
+                className="flex items-center gap-1.5 text-xs font-bold text-accent bg-accent/10 hover:bg-accent/20 px-3 py-1.5 rounded-xl border border-accent/20 cursor-pointer transition-all active:scale-95 whitespace-nowrap shrink-0"
+              >
+                <Award size={13} className="text-accent" />
+                <span className="tabular-nums">{userProfile?.points || 0} pts</span>
+              </button>
+            </div>
+          </header>
+        )}
+
         {activeTab !== 'Accueil' && activeTab !== 'Onboarding' && (
           <div className="px-6 pt-6 md:px-8 pb-2 flex items-center justify-between">
             <button
