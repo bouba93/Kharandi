@@ -16,6 +16,178 @@ export interface FallbackSubject {
 }
 
 const BASE_FALLBACK_SUBJECTS: FallbackSubject[] = [
+  {
+    id: "cours-histoire-terminale-tss-mao",
+    title: "Cours Complet d’Histoire — Terminale TSS (Mr. MAO / GS CAMESS)",
+    description: "Cours officiel et complet d'Histoire pour les Terminales TSS rédigé par Mr. MAO au GS CAMESS. Couvre les crises des années 30, la Seconde Guerre mondiale, l'ONU, la décolonisation et les civilisations contemporaines.",
+    doc_type: "COURS",
+    category: "REAL",
+    subject: { id: 8, name: "Histoire", icon: "Globe" },
+    level: "Terminale TSS",
+    is_free: true,
+    year: "2021",
+    country: "Guinée",
+    institution: "GS CAMESS — Mr. MAO",
+    content: `# COURS ET TRAITÉ D'HISTOIRE — TERMINALE TSS
+**Auteur : Mr. MAO | Établissement : GS CAMESS (Contacts : 622 38 66 40 / 69)**
+
+---
+
+## PROGRAMME OFFICIEL D'HISTOIRE (TERMINALE TSS)
+1. Les crises des années « 30 » dans le monde.
+2. La seconde guerre mondiale de 1939-1945.
+3. La participation africaine et malgache à la seconde guerre mondiale de 1939-1945.
+4. Les conséquences de la guerre de 1939-1945.
+5. Les conférences préparatoires de la réorganisation du monde.
+6. La création de l’ONU en 1945.
+7. Les tensions idéologiques entre l’Est et l’Ouest de 1947 à 1991.
+8. La décolonisation.
+9. Les luttes de libération nationale en Asie et en Afrique.
+10. La lutte pacifique de libération nationale.
+11. La lutte armée de libération nationale.
+12. L’Union Africaine.
+13. La notion de civilisation (civilisation au singulier et civilisation au pluriel).
+14. La crise « âge-retraité » d’une civilisation.
+15. La Diaspora noire.
+16. Le Sionisme au Proche-Orient.
+17. L’Apartheid en Azanie (actuelle Afrique du Sud).
+18. Le Nouvel Ordre Mondial de la Culture, de l’Information et de la Communication.
+
+---
+
+## BIBLIOGRAPHIE DE RÉFÉRENCE
+1. « Histoire de l'Afrique Noire, d'Hier à Demain » de Joseph KI-ZERBO, Hatier 1968.
+2. « Le portrait du colonisé » (Albert MEMMI).
+3. « Le portrait du colonisateur » (Albert MEMMI).
+4. « Histoire (de la fin du XIXe siècle au lendemain de la seconde guerre mondiale) », Collection Berstin MILIA 1988.
+5. « Histoire Terminale (de 1945 à nos jours) », Collection GREH, Hachette-Lycée, 1989.
+6. « Décolonisation et problèmes de l'Afrique indépendante », 38e édition, Hatier, 1989.
+7. « Histoire Terminale » de Jacques MARSEILLE, Nathan, 1991.
+
+---
+
+## CHAPITRE I — DES CRISES DES ANNÉES « 30 » À LA SECONDE GUERRE MONDIALE (1939 - 1945)
+
+### Introduction
+La seconde guerre mondiale, à l'image de la première, résulta d'un jeu très complexe de rivalités constantes entre les puissances impérialistes européennes. Elle fut également la suite logique d'une longue série de crises de toute nature ayant secoué le monde au cours des années « 30 ».
+
+### 1. Les crises des années « 30 » dans le monde
+* **a) Définition :** Les crises des années « 30 » dans le monde désignent l'ensemble des évènements malheureux engendrant des déséquilibres d'ordre économique, politique, social, diplomatique et militaire survenus entre 1929 et 1939, débouchant sur la seconde guerre mondiale.
+* **b) Causes principales :**
+  - **Les conséquences de la première guerre mondiale (1914-1918) :** Difficultés économiques mondiales, Europe ruinée contrainte de solliciter les capitaux des U.S.A., et rigueur des dispositions du Traité de Versailles contre les vaincus.
+  - **La crise économique de 1929 :** Survenue le jeudi 24 octobre 1929 à la bourse de Wall Street (New York, USA). Par son ampleur et ses effets sociaux et politiques, elle ébranla les régimes parlementaires européens et favorisa la montée des dictateurs (Benito Mussolini avec le Fascisme en Italie dès 1922, Adolf Hitler en Allemagne en 1933 grâce au Nazisme).
+* **c) Catégories de crises :**
+  - **Les petites crises (1931 - 1936) à caractère politico-diplomatique :**
+    * L'invasion de la Mandchourie (Chine) par le Japon en 1931.
+    * La fin des réparations allemandes en 1932.
+    * L'échec de la conférence du désarmement et du projet de fédération européenne en 1932.
+    * L'arrivée au pouvoir d'Adolf Hitler en Allemagne en 1933.
+    * Le déclin de la SDN (1933-1936) face aux Puissances de l'Axe (Allemagne-Italie-Japon).
+  - **Les grandes crises (1936 - 1939) à caractère militaire :**
+    * L'annexion de l'Éthiopie par l'Italie fasciste en 1936.
+    * La remilitarisation de la Rhénanie en 1936.
+    * La guerre civile espagnole (1936-1939) avec le triomphe du Général Franco soutenu par Mussolini et Hitler.
+    * Les crises autrichienne et tchécoslovaque en 1938.
+    * L'attaque et l'annexion de la Pologne par l'Allemagne du 1er au 30 septembre 1939 (ultime phase avant la guerre).
+
+### 2. La Seconde Guerre mondiale (1939 - 1945)
+* **Introduction :** Vingt ans après la première, elle éclata le 1er septembre 1939 par l'invasion de la Pologne par l'Allemagne nazie et prit fin le 2 septembre 1945 par la capitulation officielle du Japon.
+* **A. Causes :** Effets de la 1ère GM, rivalités impérialistes (France/Angleterre vs Allemagne/Italie), attitude belliqueuse des deux blocs rivaux, et crises de 1929-1939.
+* **B. Principales étapes :**
+  - **1) Offensive victorieuse de l'Axe (1939-1941) :** Annexion de la Pologne, occupation de l'Europe du Nord (1940), chute de Paris en juin 1940 (gouvernement de Vichy avec le Maréchal Pétain), résistance anglaise, violation du pacte germano-soviétique (21 juin 1941), et attaque de Pearl Harbor par le Japon (7 décembre 1941).
+  - **2) Tournant de la guerre (1941-1942) :** Entrée en guerre officielle de l'URSS et des USA aux côtés des Alliés.
+  - **3) Victoires des Alliés (1942-1945) :** Batailles du Pacifique (Midway, mer du Corail), débarquement en Méditerranée (Opération Torch), bataille de Stalingrad (1943), libération de la France (Normandie le 6 juin 1944, Provence le 15 août 1944), suicide d'Hitler (30 avril 1945), capitulation allemande (8 mai 1945), et bombardements atomiques d'Hiroshima (6 août) et Nagasaki (9 août 1945) par Harry Truman menant à la capitulation du Japon le 2 septembre 1945.
+
+### 3. La participation africaine et malgache à la Seconde Guerre mondiale
+* **a) Participation humaine :** Mobilisation massive (ex: 130 000 soldats de l'AOF en 1939, 127 320 en 1940, 34 000 malgaches). En 1942-1945, les soldats africains représentaient 9% des troupes françaises sur les fronts les plus meurtriers.
+* **b) Participation économique :** Fourniture obligatoire de produits agricoles (céréales, bétail) et souscriptions financières sous le vocable « effort de guerre ».
+* **c) Participation territoriale :** Combats en Afrique du Nord-Est (libération de l'Éthiopie) et bases arrière stratégiques (Kayes au Mali, Algérie, Sierra Leone).
+
+### 4. Les conséquences de la guerre
+* **a) Humaines :** La plus meurtrière de l'histoire (50 à 60 millions de morts, mutilés, disparus).
+* **b) Économiques et matérielles :** Déséquilibre mondial, destruction des infrastructures routières, portuaires et urbaines.
+* **c) Sociales :** Choc moral mondial suite à la découverte des camps de concentration et à l'extermination de 6 millions de Juifs.
+* **d) Politiques et diplomatiques :** Émergence de deux supergrands (USA et URSS) et début de la guerre froide, création de l'ONU, et éveil de la conscience nationaliste en Asie et en Afrique.
+
+### 5. Les conférences préparatoires de la réorganisation du monde
+* Conférence de l'Atlantique (août 1941)
+* Conférence de Washington (1er janvier 1942 — Déclaration des Nations Unies)
+* Conférence de Moscou (octobre 1943)
+* Conférence de Téhéran (novembre-décembre 1943)
+* Conférence de Dumbarton Oaks (septembre 1944 — structures de l'ONU)
+* Conférence de Yalta (février 1945 — capitulation allemande et droit de véto)
+* 1ère Conférence de San Francisco (avril-juin 1945 — signature de la charte)
+* Conférence de Potsdam (juillet-août 1945 — sort de l'Allemagne)
+* 2ème Conférence de San Francisco (24 octobre 1945 — naissance officielle de l'ONU avec 51 États).
+
+### 6. La création de l'ONU en 1945
+* **Organes principaux :**
+  1. *L'Assemblée Générale :* Organe suprême, vote le budget (51 États fondateurs, 194 aujourd'hui).
+  2. *Le Conseil de Sécurité :* 15 membres dont 5 permanents (USA, Russie, Royaume-Uni, France, Chine) avec droit de véto.
+  3. *Le Secrétariat Général :* Coordonne les activités. Secrétaires généraux successifs : Trygve Lie (Norvège), Dag Hammarskjöld (Suède), U Thant (Birmanie), Kurt Waldheim (Autriche), Javier Pérez de Cuéllar (Pérou), Boutros Boutros-Ghali (Égypte), Kofi Annan (Ghana), Ban Ki-moon (Corée du Sud), António Guterres (Portugal).
+  4. *Le Conseil Économique et Social :* Coordonne les institutions spécialisées (UNICEF, UNESCO, OMS, FMI, FAO, etc.).
+  5. *La Cour Internationale de Justice :* Basée à La Haye (Pays-Bas).
+  6. *Le Conseil de Tutelle.*
+* **Objectifs et principes :** Préserver les générations futures de la guerre, maintenir la paix, favoriser le progrès social, égalité souveraine des États, non-ingérence et règlement pacifique des différends.
+
+### 7. Les tensions idéologiques entre l'Est et l'Ouest (1947 - 1991)
+* **Origines :** Révolution bolchévique de 1917, opposition capitalisme (USA) vs socialisme (URSS).
+* **Causes :** Doctrine Truman (endiguer le communisme, 1947), Kominform, Plan Marshall (1947), blocus de Berlin, guerre de Corée (1950-1953), crise des missiles à Cuba (1962), création de la CIA et du KGB.
+* **Détente et coexistence pacifique :** Décès de Staline (1953), accords de Genève (1955), téléphone rouge (1963), traités de non-prolifération.
+* **Fin de la guerre froide :** Rencontres Reagan - Gorbatchev, chute du mur de Berlin (11 novembre 1989), et éclatement de l'URSS le 8 décembre 1991.
+
+---
+
+## CHAPITRE II — LA DÉCOLONISATION DE L'ASIE, DE L'AFRIQUE ET L'AFFIRMATION DU TIERS-MONDE
+
+### 1. La décolonisation
+* **Définition :** Ensemble des luttes pacifiques et violentes menées par les peuples colonisés pour recouvrer leur souveraineté.
+* **Facteurs internes :** Abus de l'administration coloniale (travail forcé, impôts, ségrégation), et formation de l'élite locale.
+* **Facteurs externes :** Impact de la Seconde Guerre mondiale (démystification de l'homme blanc), action anticolonialiste des USA et de l'URSS, rôle de l'ONU et des Églises.
+
+### 2. Les luttes de libération nationale
+* **Lutte pacifique :** Politique (partis comme le PDG-RDA en Guinée, le Parti du Congrès en Inde), syndicale (UGTAN), et culturelle (négritude).
+* **Lutte armée :** Conflits violents (Algérie, Viêt-Nam, colonies portugaises).
+
+### 3. Processus de décolonisation de quelques pays
+* **Indochine :** Infiltration japonaise, création du Việt Minh par Ho Chi Minh et le Général Vo Nguyen Giap. Insurrection d'août 1945, défaite française à Diên Biên Phu (1954), accords de Genève.
+* **Inde :** Colonie britannique, création du Parti du Congrès (1885). Mahatma Gandhi et la désobéissance civile non-violente (Swaraj). Indépendance et partition en 1947 (Inde et Pakistan, puis Bangladesh en 1971).
+* **Algérie :** Colonie de peuplement depuis 1830. Création du FLN et insurrection armée du 1er novembre 1954. Accords d'Évian et indépendance le 5 juillet 1962 (Ahmed Ben Bella premier président).
+* **Gold Coast (Ghana) :** Kwame Nkrumah et le CPP. Indépendance le 6 mars 1957 (premier pays d'Afrique noire).
+* **Guinée française :** Associations régionales, création du PDG-RDA (section du RDA). Rôle décisif d'Ahmed Sékou Touré et du syndicalisme (grève de 1953, loi-cadre de 1956). Référendum du 28 septembre 1958 (« NON » massif à la communauté franco-africaine) et proclamation de l'indépendance le 2 octobre 1958 (Résultat : 1 136 234 « NON », soit 95%).
+
+### 4. L'Union Africaine
+* **De l'OUA à l'UA :** Création de l'OUA le 28 mai 1963 à Addis-Abeba. Remplacée par l'Union Africaine (UA) proclamée à Syrte en 1999 et officialisée à Durban en juillet 2002.
+* **Objectifs et organes :** Défense de la souveraineté, intégration socio-économique, Conférence des Chefs d'État, Conseil exécutif et Commission de l'UA (dirigée successivement par Amara Essy, Alpha Oumar Konaré, Jean Ping, Nkosazana Dlamini-Zuma et Moussa Faki Mahamat).
+
+---
+
+## CHAPITRE III — CIVILISATIONS ET PROBLÈMES DU MONDE CONTEMPORAIN
+
+### 1. La notion de civilisation
+* **Civilisation au singulier :** Conception européenne ancienne et ethnocentriste (Grecs qualifiant les autres de "barbares"). L'Europe se posait en unique modèle.
+* **Civilisation au pluriel :** Conception moderne et scientifique (depuis le XIXe siècle). Tout peuple est naturellement civilisé ; il existe des civilisations et non une seule civilisation.
+
+### 2. La Diaspora noire
+* **Définition :** Ensemble de la communauté noire vivant hors d'Afrique de gré ou de force.
+* **Causes :** Historiques (traite négrière, colonisation), économiques, politiques, culturelles et naturelles.
+* **Rôle :** Contribution au développement socio-économique de l'Afrique et renforcement des liens de solidarité panafricaine.
+
+### 3. Le Sionisme au Proche-Orient
+* **Présentation :** Carrefour géostratégique (Europe-Asie-Afrique), riche en hydrocarbures et berceau des trois religions monothéistes.
+* **Définition du Sionisme :** Doctrine politico-religieuse née à Bâle en 1896 (Léo Pinsker, Théodore Herzl) préconisant le retour des Juifs en Terre promise (Palestine).
+* **Évolution :** Déclaration Balfour (1917), plan de partage de l'ONU en 1947, proclamation de l'État d'Israël le 14 mai 1948, et guerres israélo-palestiniennes successives (1948, Suez 1956, guerre des Six Jours 1967, Kippour 1973).
+
+### 4. L'Apartheid en Azanie (Afrique du Sud)
+* **Présentation :** Ancien nom de l'Afrique du Sud, terre de peuplement et nation arc-en-ciel.
+* **Le régime d'Apartheid :** Institutionnalisé en 1948 par la minorité blanche (séparation raciale stricte, confinement des Noirs, pass obligatoire).
+* **Lutte et libération :** Action de l'ANC (Nelson Mandela, Oliver Tambo, Desmond Tutu). Soulèvement de Soweto (1976), libération de Mandela en 1990 par Frederik de Klerk, et premières élections multiraciales de 1994 couronnant Nelson Mandela premier président noir.
+
+### 5. Le Nouvel Ordre Mondial de la Culture, de l'Information et de la Communication
+* **Problématique :** Déséquilibre entre le Nord (suréquipé, surinformé) et le Sud (sous-équipé, souvent caricaturé ou sous-informé).
+* **Objectifs :** Établir un partenariat équitable dans les flux d'information (création de la PANA), valoriser les cultures du Sud et démocratiser les technologies de la communication.
+`
+  },
   // ─── 1. EXAMENS RÉELS OFFICIELS (GUINÉE) ──────────────────────────────────
   {
     id: "bac-math-sm-2021",
