@@ -7,6 +7,7 @@ import { Marketplace } from './Marketplace';
 import { SellerDashboard } from './SellerDashboard';
 import { HomeContent } from './HomeContent';
 import { Library } from './Library';
+import { CoursesFeature } from './CoursesFeature';
 import { Notifications } from './Notifications';
 import { Profile } from './Profile';
 import { AITeacherChat } from './AITeacherChat';
@@ -35,6 +36,7 @@ import { toast } from 'sonner';
 const tabToPath: Record<string, string> = {
   'Accueil': '/',
   'Sujets et traités': '/biblio',
+  'Cours': '/cours',
   'Exo Gagnant': '/exercices',
   'Mon Wallet': '/wallet',
   'Kharandi École': '/notes',
@@ -272,6 +274,8 @@ export const Dashboard: React.FC = () => {
         return <HomeContent role={role} setActiveTab={setActiveTab} setIsAIChatOpen={setIsAIChatOpen} onSearch={handleSearch} onCourseSelect={handleCourseSelect} />;
       case 'Sujets et traités':
         return <Library initialSearchQuery={searchQuery} initialCourseId={selectedCourseId} onCourseClose={() => setSelectedCourseId(null)} onOpenKaramo={openKaramoWithContext} setActiveTab={setActiveTab} />;
+      case 'Cours':
+        return <CoursesFeature onOpenKaramo={openKaramoWithContext} setActiveTab={setActiveTab} />;
       case 'Exo Gagnant':
         return <Exercises />;
       case 'Mon Wallet':
@@ -316,6 +320,7 @@ export const Dashboard: React.FC = () => {
   const navItems: Array<{ id: string; icon: any; kIcon: KharandiIconName; roles?: string[]; premium?: boolean; badge?: boolean }> = [
     { id: 'Accueil', icon: Home, kIcon: 'accueil' as KharandiIconName },
     { id: 'Sujets et traités', icon: BookOpen, kIcon: 'cours' as KharandiIconName, roles: ['student', 'eleve', 'parent', 'admin', 'teacher', 'repetiteur'] },
+    { id: 'Cours', icon: GraduationCap, kIcon: 'cours' as KharandiIconName, roles: ['student', 'eleve', 'parent', 'admin', 'teacher', 'repetiteur'] },
     { id: 'Calcul mental', icon: Brain, kIcon: 'abacus' as KharandiIconName, premium: true, roles: ['student', 'eleve', 'parent', 'admin', 'teacher', 'repetiteur'] },
     { id: 'Exo Gagnant', icon: PenTool, kIcon: 'exercices' as KharandiIconName, roles: ['student', 'eleve', 'admin'] },
     { id: 'Mon Wallet', icon: WalletIcon, kIcon: 'portefeuille' as KharandiIconName, roles: ['student', 'eleve', 'parent', 'admin', 'teacher', 'repetiteur', 'seller'] },
